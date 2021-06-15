@@ -1,7 +1,8 @@
 import React from 'react';
 import {
   ChakraProvider,
-  extendTheme 
+  extendTheme ,
+  withDefaultColorScheme
 } from '@chakra-ui/react';
 import { createBrowserHistory } from "history";
 
@@ -39,8 +40,8 @@ const App = ()=> {
     <ChakraProvider theme={theme}>
      <Router history={history}>
         <Switch>
-          <Route path="/Gallery" component={Gallery}/>
-          <Route path="/" component={TimeLine}/>
+          <Route exact path="/Gallery" component={Gallery}/>
+          <Route exact path="/" component={TimeLine}/>
         </Switch>
       </Router>
     </ChakraProvider>

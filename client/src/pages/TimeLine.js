@@ -1,7 +1,21 @@
 import React, {useEffect, useState} from 'react';
+import {
+  Link
+} from "react-router-dom";
 
 import wiki from 'wikijs';
-import { Box, Code, Text, VStack, Image, Heading, Divider } from '@chakra-ui/react';
+import { Box, Code, Text, VStack, Image, Heading, Divider, HStack,
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  useDisclosure,
+  Input,
+  Button
+        } from '@chakra-ui/react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
 import ImageDistort from '../utils/ImageDistort';
 
@@ -21,19 +35,23 @@ import i3 from '../assets/i3.png';
 import i4 from '../assets/i4.png';
 import i5 from '../assets/i5.png';
 
+// TODO - either character with image distort bg or map with major cities with image distort of relevant pieces.
+
 const TimeLine =() => {
     const images =[
       "https://upload.wikimedia.org/wikipedia/commons/c/c2/Gebel_el-Arak_Knife_ivory_handle_%28front_top_part_detail%29.jpg",
       "https://upload.wikimedia.org/wikipedia/commons/b/b7/Mesopotamia%2C_Periodo_proto-dinastico%2C_placca_con_scena_di_banchetto%2C_da_khafajah%2C_2650-2550_ac_ca.jpg",
       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Anubanini_extracted.jpg/1024px-Anubanini_extracted.jpg",
-      "https://upload.wikimedia.org/wikipedia/commons/0/01/Assyrian_Crown-Prince_MET_DP-13006-005.jpg",
       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/N-Mesopotamia_and_Syria_english.svg/1280px-N-Mesopotamia_and_Syria_english.svg.png"
     ]
 
-    
+    const { isOpen, onOpen, onClose } = useDisclosure()
+    const boxClickRef = React.useRef()
     const [histData, setHistData] = useState([]);
     const [intro, setIntro] = useState([]);
     const [isDesktop, setIsDesktop] = useState(false);
+
+    const [drawerContent, setDrawerContent] = useState({});
 
     const fetchWikiPageContent = async () =>{
       try {
@@ -44,7 +62,7 @@ const TimeLine =() => {
         const pageContent = await pageResponse.content();
         const filterPageCont = pageContent.filter(c => 
             (c.title != "See also" 
-            && c.title !== 'References' 
+            && c.title !== 'References'
             && c.title !== 'Further reading' 
             && c.title !== 'External links'
             && c.title !== 'Classical writers'
@@ -58,7 +76,7 @@ const TimeLine =() => {
         }));
 
         setHistData(filterPageCont);
-
+        setIsDesktop(window.innerWidth > 1200)
         }catch(error){
             console.log(error);
         }
@@ -69,11 +87,14 @@ const TimeLine =() => {
     useEffect(() => {
        fetchWikiPageContent();
 
-       setIsDesktop(window.innerWidth > 1200)
-       console.log(window.innerWidth > 1200);
+      
 
     }, [])
 
+    const onOpenDrawer= (title, content)=>{
+      onOpen();
+      setDrawerContent({title: title, content: content});
+    }
 
     return (
 
@@ -83,6 +104,8 @@ const TimeLine =() => {
         <ColorModeSwitcher />
       </Box>
 
+      <VStack >
+
       <Heading 
        
        marginTop={10} 
@@ -90,73 +113,126 @@ const TimeLine =() => {
        fontSize={{lg:'9xl', base:'5xl'}} 
        marginLeft={3} 
        fontWeight="bold" 
-       fontStyle='italic'  >Mesopotamia<Divider/></Heading>
+       fontStyle='italic'  >Mesopotamia</Heading>
+    <Divider/>
     
-    <Box padding={10}>
-      {intro[0] && <Code>{intro[0].content}</Code>}
-    </Box>
+    <VStack className='myListRoot' spacing='30px'>
+      {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
+      <Box className='myListItem'>
+      {/* Country of the noble lords */}
+      <Text  fontSize="100px" _hover={{color:'white'}} >𒆠𒂗𒄀</Text>
+      <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/7/79/Enthroned_King_of_Ur.jpg"} />
+      </Box>
+      <Box className='myListItem'>
+      <Text fontSize="100px" _hover={{color:'white'}} >𒆠𒂗𒄀</Text>
+      <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Standard_of_Ur_-_War.jpg/640px-Standard_of_Ur_-_War.jpg"} />
+      </Box>
+      <Box className='myListItem'>
+      <Text fontSize="100px" _hover={{color:'white'}} >𒆠𒂗𒄀</Text>
+      <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ea_%28Babilonian%29_-_EnKi_%28Sumerian%29.jpg"} />
 
-
-      <Box marginTop={10} padding={3}  style={{ width: "100%", height: "100%" }}>
-
-
-        <Timeline align='right' className="myListRoot" >
-
-          {histData.map((c,i) => {
-              return(
-                  <TimelineItem key={i} >
-                  <TimelineOppositeContent className="myListItem" >
-
-                      <Code fontSize={{ base:'10px', lg: "14px" }} >{c.content}
-                      {
-                          c.items && c.items.map((cc,ci) => (<Text key={ci}>{cc.title}</Text>))
-                      }
-                      </Code>
-                      <img hidden src={images[i]} />
-
-                  </TimelineOppositeContent>
-
-                  <TimelineSeparator  style={{zIndex:'-11'}}>
-                    <TimelineDot />
-                    <TimelineConnector />
-
-                  </TimelineSeparator>
-
-                {isDesktop &&  <ImageDistort
+      </Box>
+    </VStack>
+    {isDesktop &&  <ImageDistort
                     styles={{ zIndex: -10 }}
                     listRoot={".myListRoot"}
                     itemRoot={".myListItem"}
                     options={{
-                      strength: 0.7,
+                      strength: 0.5,
                       effect: "redshift",
                       geometry: {
-                        shape: "circle",
-                        radius: 0.2,
+                        shape: "plane",
+                        // radius: 0.4,
                         segments: 128,
-                        width: 0.9,
-                        height: 0.9
+                        width: 0.5,
+                        height: 0.5
                         
                       }
                     }}
                   />}
-                  <TimelineContent><Code fontSize={{ base:'10px', lg: "14px" }}>{c.title}</Code></TimelineContent>
-                </TimelineItem>
+       </VStack>
 
+
+      <Box marginTop={10} padding={3} >
+
+
+        <Timeline align='alternate' className="myListRoot" >
+
+          {histData.map((c,i) => {
+              return(
+
+                c.items && 
+                c.items.map((cc,ci) => (
+                  <TimelineItem key={ci} >
+
+                    <TimelineSeparator >
+                      <TimelineDot />
+                      <TimelineConnector />
+
+                    </TimelineSeparator>
+
+                    <TimelineContent>
+                        <Box 
+                          ref={boxClickRef} 
+                          onClick={() => onOpenDrawer(cc.title, cc.content)}
+                          border='1px' 
+                          maxWidth='4xl' 
+                          transition='0.5'
+                          _hover={{backgroundColor:'beige', color:'black', transition:'0.5s ease', webkittransition:' 0.5s ease'}} 
+                          // padding='10px' 
+                          cursor='pointer'
+                          transition='0.5s ease'
+                          webkittransition='0.5s ease'
+                          align='center'
+                            >
+                          <Box overflow="hidden" >
+                          <Image  _hover={{transform: 'scale(1.1)'}}  transition='transform .6s' objectFit="contain" 
+                          src={'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Anubanini_extracted.jpg/1920px-Anubanini_extracted.jpg'}/>
+                          </Box>
+                          <Text fontWeight='extrabold' fontSize={{ base:'10px', lg: "22px" }} key={ci}>{cc.title}</Text>
+                        </Box>
+
+                    </TimelineContent>
+                  
+                   
+                </TimelineItem>
+                )
               )
-          }) 
+              )
           }
+        )}
           
         </Timeline>
-      
-
-        {/* <Chrono items={items} mode='VERTICAL_ALTERNATING' hideControls /> */}
-
     
       </Box>
-
-
       
+      <Drawer
+          isOpen={isOpen}
+          placement="left"
+          onClose={onClose}
+          finalFocusRef={boxClickRef}
+          size='xl'
+          isCentered='true'
+        >
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton  />
+              <DrawerHeader>{drawerContent.title}</DrawerHeader>
 
+              <DrawerBody>
+                <Text>{drawerContent.content}</Text>
+                <Link to={{ pathname: '/gallery', params:{ title : drawerContent.title}}}>
+                <Button  size='lg' variant="outline" colorScheme='cyan' mt={20}>
+                  Discover Artefacts in this period</Button></Link>
+              </DrawerBody>
+              
+              <DrawerFooter>
+                <Button variant="outline" mr={3} onClick={onClose}>
+                  Close
+                </Button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
       </VStack>
     );
   }

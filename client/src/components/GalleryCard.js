@@ -57,26 +57,26 @@ const GalleryCard = ({title, imgURL, dateCreation, region,  restPayload}) =>{
             <Stack spacing={4}  direction={{ base:"column"}} align='center' >
 
 
-            <Table  >
+            <Table>
               <Tbody fontSize={{ base:'10px', lg: "15px" }}>
                {dateCreation && 
                 <Tr>
                     <Td fontWeight='semibold'>Date Created</Td>
-                    <Td >{dateCreation}</Td>
+                    <Td>{dateCreation}</Td>
                   </Tr>
                 }
                 {
                 region && 
                 <Tr>
-                  <Td fontWeight='semibold'>Region </Td>
+                  <Td fontWeight='semibold'>Region</Td>
                   <Td>{region}</Td>
                 </Tr>
                 }
                 {
                   restPayload && 
                     restPayload.map((o, i) => (
-                    o.type && 
-                    <Tr>
+                    o && 
+                    <Tr key={i}>
                       <Td fontWeight='semibold'>{o.type}</Td>
                       <Td>{o.data}</Td>
                     </Tr>

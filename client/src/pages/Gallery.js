@@ -16,7 +16,9 @@ import axios from 'axios';
 import SkeletonCards from "../components/SkeletonCards";
 
 import {
-  Link
+  Link,
+  useLocation,
+  useParams
 } from "react-router-dom";
 
 import "@fontsource/raleway/400.css"
@@ -39,17 +41,21 @@ const Gallery = ()=> {
 
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pageTitle, setPageTitle] = useState('');
 
   const { colorMode } = useColorMode()
   
   // used for the alert box.
 
-
+  const location = useLocation();
+  useEffect(()=>{
+    setPageTitle(location.params.title)
+  },[location])
   const fetchMuseumObjects = async () =>{
    
     // testing potentail parameters
       //const params = {query:'Achaemenid', start: -600, end: -330};
-      const params = {query: 'Mesopotamia', start: -7000, end: -1000};
+      const params = {query: pageTitle, start: -7000, end: -1000};
       //const params = {query: 'Mesopotamia', start: -1, end: 1000};
       //const params = {query: 'Iraq', start: -331, end: -140};
      // const params = {query:'Iraq', start: -5000, end: 1400};
@@ -268,7 +274,7 @@ const Gallery = ()=> {
               fontSize={{lg:'9xl', base:'5xl'}} 
               marginLeft={3} 
               fontWeight="bold" 
-              fontStyle='italic'  >Ancient Mesopotamia<Divider/></Heading>
+              fontStyle='italic'  >{pageTitle}<Divider/></Heading>
 
                 <AlertContent errors={errors} />   
   
@@ -301,7 +307,9 @@ const Gallery = ()=> {
                     imgURL={`https://framemark.vam.ac.uk/collections/${a._primaryImageId}/full/735,/0/default.jpg`}
                     dateCreation={a._primaryDate}
                     region={a._primaryPlace} 
-                    restPayload={[{type: 'Type', data:a.objectType}]}
+                    restPayload={[
+                      a.objectType && {type: 'Type', data:a.objectType}
+                    ]}
                   />
 
 
@@ -318,8 +326,8 @@ const Gallery = ()=> {
                   imgURL={a.primaryimageurl}
                   dateCreation={a.dated}
                   restPayload={[
-                    {type: 'Classification', data:a.classification},
-                    {type: 'Culture', data: a.culture}           
+                    a.classification && {type: 'Classification', data:a.classification},
+                    a.culture && {type: 'Culture', data: a.culture}           
                   ]}
                 />
 

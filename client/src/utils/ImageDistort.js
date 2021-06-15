@@ -169,7 +169,7 @@ class ImageDistort extends Component {
 
       TweenLite.to(this.uniforms.uAlpha, 0.2, {
         value: 1,
-        ease: Power4.easeIn
+        ease: Power4.easeOut
       });
     }
   }
