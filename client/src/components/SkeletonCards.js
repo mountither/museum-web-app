@@ -15,7 +15,7 @@ const SkeletonCards = () =>{
         for(var i=0; i< 1; i++) 
         {
             SkeletonRows.push({image: <Skeleton  width={{ xl: "50vw", base: "70vw"}} height="50vh"/>,
-                                text: <Skeleton width={{ xl: "50vw",base: "70vw"}} height="10px"/>
+                                text: <Skeleton width={{ xl: "20vw",base: "20vw"}} height="10px"/>
                             })
 
         }
@@ -27,7 +27,7 @@ const SkeletonCards = () =>{
     }, [])
 
     return (
-        <Stack>
+        <Stack align='center'>
             {skeletons.map((row,i) => 
             {
                 return (

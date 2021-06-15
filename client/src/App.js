@@ -18,8 +18,9 @@ import {
 
 
 const breakpoints = createBreakpoints({
-  sm: "400px",
-  md: "768px",
+  xs: "350px",
+  sm: "450px",
+  md: "767px",
   lg: "960px",
   xl: "1200px",
 })

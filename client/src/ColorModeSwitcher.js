@@ -1,25 +1,25 @@
 import React from 'react';
-import { useColorMode, useColorModeValue, IconButton} from '@chakra-ui/react';
-import { WiMoonWaningCrescent5 } from "react-icons/wi";
-import {IoIosSunny} from "react-icons/io";
+import { useColorMode, useColorModeValue, Image} from '@chakra-ui/react';
+
+import SunToggle from './assets/sun_toggle.png';
+import MoonStarToggle from './assets/moonstar_toggle.png';
 
 
 export const ColorModeSwitcher = props => {
 
   const { toggleColorMode } = useColorMode();
   const text = useColorModeValue('dark', 'light');
-  const SwitchIcon = useColorModeValue(WiMoonWaningCrescent5, IoIosSunny);
+  const SwitchIcon = useColorModeValue(MoonStarToggle, SunToggle);
 
   return (
-    <IconButton
-      size="md"
-      fontSize="25px"
+    <Image
+      cursor = 'pointer'
       aria-label={`Switch to ${text} mode`}
-      variant="ghost"
-      color="current"
-      marginLeft="2"
+      marginLeft="3"
+      width={10}
+      src={SwitchIcon}
       onClick={toggleColorMode}
-      icon={<SwitchIcon />}
+      // icon={<SwitchIcon />}
       {...props}
     />
 

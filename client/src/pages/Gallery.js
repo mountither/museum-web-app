@@ -1,26 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {
-  ChakraProvider,
   Box,
   Text,
   VStack,
-  HStack,
   Grid,
-  theme,
-  Button,
   Divider,
-  Stack,
-  Tag,
-  TagLabel,
-  TagLeftIcon,
-  Spacer,
-  Image,
-  Center,
-  Spinner,
   useColorMode,
   Heading,
-  Skeleton, SkeletonCircle, SkeletonText,
-  Flex
+  
 } from '@chakra-ui/react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
 
@@ -28,95 +15,237 @@ import axios from 'axios';
 
 import SkeletonCards from "../components/SkeletonCards";
 
-import {  RiMapPinTimeLine} from "react-icons/ri";
-
-
+import {
+  Link
+} from "react-router-dom";
 
 import "@fontsource/raleway/400.css"
 import "@fontsource/open-sans/700.css"
 
+import AlertContent from '../components/AlertContent';
+import GalleryCard from '../components/GalleryCard';
+
+
+// TODO - Implement a Load more feature (pagination)
+
 const Gallery = ()=> { 
 
-  const [metArtData, setMetArtData] = useState([]);
-  const [vamArtData, setVamArtData] = useState([]);
-  const [hamArtData, setHamArtData] = useState([]);
+  const [metArtData, setMETArtData] = useState([]);
+  const [vamArtData, setVAMArtData] = useState([]);
+  const [hamArtData, setHAMArtData] = useState([]);
+  const [smgArtData, setSMGArtData] = useState([]);
+  const [mvcArtData, setMVCArtData] = useState([]);
+  const [aicArtData, setAICArtData] = useState([]);
 
+  const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { colorMode } = useColorMode()
   
-  const fetchVAMObject = async()=>{
-    try {
+  // used for the alert box.
+
+
+  const fetchMuseumObjects = async () =>{
+   
+    // testing potentail parameters
+      //const params = {query:'Achaemenid', start: -600, end: -330};
+      const params = {query: 'Mesopotamia', start: -7000, end: -1000};
+      //const params = {query: 'Mesopotamia', start: -1, end: 1000};
+      //const params = {query: 'Iraq', start: -331, end: -140};
+     // const params = {query:'Iraq', start: -5000, end: 1400};
+
+
       setLoading(true);
 
+      const tempErrorArr = [];
+      
+      const [METRes, METError] = await getMETResponse(params);
 
+      !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
+      
+      const [VAMRes, VAMError] = await getVAMResponse(params);
+
+      !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
+      const [HAMRes, HAMError] = await getHAMResponse(params);
+
+      !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
+
+      // const [SMGRes, SMGError] = await getSMGResponse(params);
+
+      // !SMGError ? setSMGArtData(SMGRes.data.data) : tempErrorArr.push(SMGError);
+
+      const [MVCRes, MVCError] = await getMVCResponse(params);
+
+      !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
+
+      const [AICRes, AICError] = await getAICResponse(params);
+      console.log(AICRes);
+      !AICError ? setAICArtData(AICRes) : tempErrorArr.push(AICError);
 
       //const resSMITH = await axios.get(`https://www.brooklynmuseum.org/api/v2/tags/Mesopotamia`);
       
       // console.log(resSMITH.data.response.rows);
 
-
-      // console.log(resSMITH.data.records);
-
+      setErrors(tempErrorArr);
 
       setLoading(false);
 
-    }
-    catch (error) {
-        console.log(error);
-    }
   
   }
-
-  const fetchMuseumObjects = async () =>{
-    try {
-      // testing potentail parameters
-      //const params = {query:'Achaemenid', start: -600, end: -330};
-      const params = {query: 'Seleucid', start: -331, end: -140};
-      //const params = {query: 'Mesopotamia', start: -331, end: -140};
-      //const params = {query: 'Iraq', start: -331, end: -140};
-      
-
-      setLoading(true);
-      // fecth from met
+  // Metropolitan Museum
+  const getMETResponse = async(params)=>{
+    try
+    {
+      // fecth from metro museum
       //const resMET = await axios.get("https://collectionapi.metmuseum.org/public/collection/v1/search?geoLocation=Iraq&q=fgfhdood&hasImage=true");
-      const resMET = await axios.get(`https://collectionapi.metmuseum.org/public/collection/v1/search?q=${params.query}&hasImage=true`);
+      const objectResponse = await axios.get(`https://collectionapi.metmuseum.org/public/collection/v1/search?q=${params.query}&hasImage=true`);
       
-      const tempArray = [];
-      const resMETCount = resMET.data.total > 10 ? 10 : resMET.data.total;
+      const response = [];
+      const resMETCount = objectResponse.data.total > 10 ? 10 : objectResponse.data.total;
 
       for(let i=0; i < resMETCount; i++){
-        const resEach = await axios.get(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${resMET.data.objectIDs[i]}`);
-        if(resEach.data.objectBeginDate > params.start && resEach.data.objectEndDate < params.end){
-          console.log(resEach.data);
-          tempArray.push(resEach.data);
+        const resEach = await axios.get(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectResponse.data.objectIDs[i]}`);
+        if(resEach.data.objectBeginDate >= params.start && resEach.data.objectEndDate <= params.end){
+          response.push(resEach.data);
         }
       }
-      
-      
-      // fetch from vam 
-      const resVAM = await axios.get(`https://api.vam.ac.uk/v2/objects/search?q=${params.query}&images_exist=true&year_made_from=${params.start}&year_made_to=${params.end}`);
-     
-      // fetch from ham 
-      const resHAM = await axios.get(`https://api.harvardartmuseums.org/object?q=${params.query}&hasimage=1&sort=random&apikey=99b15ddf-1529-4233-bb39-15c16dee8685`);
+      console.log("Count in MET: (10 shown) ", objectResponse.data.total);
 
-      setMetArtData(tempArray);
-      setVamArtData(resVAM.data.records);
-      console.log(resHAM.data)
-      setHamArtData(resHAM.data.records);
+      //data, error
+      return [response, null];
+    }
+    catch(error)
+    {
+      console.log(error);
+      return [null, 'Metro Museum'];
+    }
+      
+  }
+  // victoria and albert museum 
+  const getVAMResponse = async(params)=>{
 
-      setLoading(false);
+    try{
+
+      // fetch from victoria and albert museum 
+      const response = await axios.get(`https://api.vam.ac.uk/v2/objects/search?q=${params.query}&images_exist=true&year_made_from=${params.start}&year_made_to=${params.end}`);
+      
+      console.log("Count in VAM:  ", response.data.info.record_count);
+
+      return [response, null];
+    }
+    catch(error){
+      console.log(error);
+
+      return [null, 'Victoria and Albert Museum']
+    }
+  }
+
+  // harvard art museums
+  const getHAMResponse = async(params)=>{
+
+    try{
+
+      // fetch from harvard arts museum
+      const response = await axios.get(`https://api.harvardartmuseums.org/object?q=${params.query}&hasimage=1&sort=random&apikey=99b15ddf-1529-4233-bb39-15c16dee8685`);
+      console.log("Count in HAM: (10 shown) ", response.data.info.totalrecords);
+      return [response, null];
 
     }
-    catch (error) {
-        console.log(error);
+    catch(error){
+
+      console.log(error);
+      
+      return [null, 'Havard Arts Museum']
     }
+  }
+
+  // science museum group
+  const getSMGResponse = async(params)=>{
+    try
+    { 
+      const headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+      
+      const url = `https://collection.sciencemuseumgroup.org.uk/search/images?q=${params.query}`;
+
+      const response = await axios.get(url, {headers});
+
+      console.log(response.data.data);
+      console.log("Count in SMG: ", response.data.meta.count.type.all);
+
+      // response.data.data.map((item) => console.log(item.attributes?.lifecycle?.creation[0].date));
+
+      return [response, null]
+    }
+    catch(error)
+    {
+      console.log(error);
+
+      return [null, 'Science Museum Group']
+
+    }
+  }
+
+  // museum victoria collection
+  const getMVCResponse = async(params)=>{
+    try
+    { 
+      const limit = 20;
+
+      const url = `https://collections.museumsvictoria.com.au/api/search?query=${params.query}&hasimages=yes&perpage=${limit}&locality=iraq`;
+
+      const response = await axios.get(url);
+
+      console.log(response);
+      console.log("Count in MVC: ", response.data.length);
+
+      // response.data.data.map((item) => console.log(item.attributes?.lifecycle?.creation[0].date));
+
+      return [response, null]
+    }
+    catch(error)
+    {
+      console.log(error);
+
+      return [null, 'Museum Victoria']
+
+    }
+  }
   
+  // Art Institute of Chicago 
+  const getAICResponse = async(params)=>{
+    try
+    { 
+      const url = `https://api.artic.edu/api/v1/artworks/search?q="${params.query}"`;
+
+      const shallowRes = await axios.get(url);
+      const response = [];
+      for(let i=0; i < shallowRes.data.data.length; i++){
+        const resEach = await axios.get(`https://api.artic.edu/api/v1/artworks/${shallowRes.data.data[i].id}`);
+        response.push(resEach.data);
+        
+      }
+
+
+      console.log("Count in AIC: (shown 10)", shallowRes.data.pagination.total);
+
+      // response.data.data.map((item) => console.log(item.attributes?.lifecycle?.creation[0].date));
+
+      return [response, null]
+    }
+    catch(error)
+    {
+      console.log(error);
+
+      return [null, 'Art Institute of Chicago']
+
+    }
   }
 
   useEffect(() =>{
-    fetchMuseumObjects();
-    // fetchVAMObject();
+   fetchMuseumObjects();
   }, [])
 
   return (
@@ -125,144 +254,127 @@ const Gallery = ()=> {
       <Box pos='absolute' left="0px">
         <ColorModeSwitcher />
       </Box>
-            {/* <Text fontSize="5xl" fontWeight="bold">Museum</Text> */}
-            {loading ? <SkeletonCards /> : 
+         <Link to='/' ><Text fontWeight='semibold' fontSize='15px' _hover={{textDecoration: 'underline'}} textUnderlineOffset='2px'>Home</Text></Link>
+          <Grid
+                templateRows="1fr 0.2fr"
+                templateColumns="1fr 1fr"
+                gridAutoFlow='dense'
+                gap={0}>
+            
+              <Heading 
+       
+              marginTop={10} 
+              gridArea={'1/1/2/3'} 
+              fontSize={{lg:'9xl', base:'5xl'}} 
+              marginLeft={3} 
+              fontWeight="bold" 
+              fontStyle='italic'  >Ancient Mesopotamia<Divider/></Heading>
 
-            metArtData.map((a, i) =>{
-              return (
-                <Box key={i} boxShadow='md' borderRadius="md" maxW="50rem" overflow="hidden" padding={5} >
-                      <Heading 
-                        mb={4} 
-                        size='sm'
-                      >
-                        {a.title}
-                      </Heading>
+                <AlertContent errors={errors} />   
+  
+          </Grid>
 
-                    <Stack maxHeight="100%" maxWidth="100%">
-                    
-                    <Image src={a.primaryImageSmall}/>
-                    </Stack>
-                     
-                    <Divider marginBottom="10px" marginTop="10px"/>
-                      <Center>
-                    <Stack  direction={{ base:"column", sm: "row" }} align='center'>
-
-                    {a.culture && <Tag size='md' fontSize={{ base:'10px', lg: "15px" }} overflow='cover' variant="subtle" >
-                        {a.culture}
-                    </Tag>}
-
-                    {a.objectDate && <Tag size='md'fontSize={{ base:'10px', lg: "15px" }} variant="subtle"  marginLeft="15px">
-                        {a.objectDate}
-                    </Tag>}
-
-                    {a.subregion && 
-                  
-                  <Tag size='md' variant="subtle" fontSize={{ base:'10px', lg: "15px" }} marginLeft="15px">
-                    <TagLeftIcon boxSize="16px" as={RiMapPinTimeLine} />
-                    <TagLabel>{a.subregion}</TagLabel>
-                    </Tag>}
-                    </Stack>
-                      </Center>
-
-                </Box>
-              )
-
-            })
-            }
-            {loading ? <SkeletonCards /> : 
-
-              vamArtData?.map((a, i) =>{
-                return (
-                  <Box key={i} boxShadow='md' borderRadius="md" maxW="50rem" overflow="hidden" padding={5} >
-                        <Heading 
-                          mb={4} 
-                          size='sm'
-                        >
-                          {a._primaryTitle ? a._primaryTitle : a.objectType}
-                        </Heading>
-
-                      <Stack maxHeight="100%" maxWidth="100%">
-                      
-                      <Image   src={`https://framemark.vam.ac.uk/collections/${a._primaryImageId}/full/735,/0/default.jpg`}/>
-                      </Stack>
-                      
-                      <Divider marginBottom="10px" marginTop="10px"/>
-                        <Center>
-                      <Stack  direction={{ base:"column", sm: "row" }} align='center'>
-
-                      {a.objectType && <Tag size='md' fontSize={{ base:'10px', lg: "15px" }} overflow='cover' variant="subtle" >
-                         Type:  {a.objectType}
-                      </Tag>}
-
-                      {a._primaryDate && <Tag size='md'fontSize={{ base:'10px', lg: "15px" }} variant="subtle"  marginLeft="15px">
-                          {a._primaryDate}
-                      </Tag>}
-
-                      {a._primaryPlace && 
-                    
-                    <Tag size='md' variant="subtle" fontSize={{ base:'10px', lg: "15px" }} marginLeft="15px">
-                      <TagLeftIcon boxSize="16px" as={RiMapPinTimeLine} />
-                      <TagLabel>{a._primaryPlace}</TagLabel>
-                      </Tag>}
-
-                      </Stack>
-                        </Center>
-
-                  </Box>
-                )
-
-              })
-              }
-
-          {loading ? <SkeletonCards /> : 
-
-          hamArtData?.map((a, i) =>{
-            return (
-              <Box key={i} boxShadow='md' borderRadius="md" maxW="50rem" overflow="hidden" padding={5} >
-                    <Heading 
-                      mb={4} 
-                      size='sm'
-                    >
-                      {a.title ? a.title : 'Untitled'}
-                    </Heading>
-
-                  <Stack maxHeight="100%" maxWidth="100%">
-                  
-                  <Image src={a.primaryimageurl}/>
-
-                  </Stack>
-                  
-                  <Divider marginBottom="10px" marginTop="10px"/>
-                    <Center>
-                  <Stack  direction={{ base:"column", sm: "row" }} align='center'>
-
-                  {a.classification && <Tag size='md' fontSize={{ base:'10px', lg: "15px" }} overflow='cover' variant="subtle" >
-                    Type:  {a.classification}
-                  </Tag>}
-
-                  {a.dated && <Tag size='md'fontSize={{ base:'10px', lg: "15px" }} variant="subtle"  marginLeft="15px">
-                      {a.dated}
-                  </Tag>}
-
-                  {a.division && 
+          {
+            loading ? <SkeletonCards /> : 
+              metArtData?.map((a, i) =>(
                 
-                <Tag size='md' variant="subtle" fontSize={{ base:'10px', lg: "15px" }} marginLeft="15px">
-                  <TagLeftIcon boxSize="16px" as={RiMapPinTimeLine} />
-                  <TagLabel>{a.division}</TagLabel>
-                  </Tag>}
+                <GalleryCard 
+                  key={i} 
+                  title={a.title} 
+                  imgURL={a.primaryImageSmall}
+                  dateCreation={a.objectDate}
+                  region={a.subregion} 
+                  restPayload={[
+                    a.culture && {type: 'Culture', data:a.culture}
+                  ]}
+                />
 
-                  </Stack>
-                    </Center>
+            ))
+            }
 
-              </Box>
-            )
+            {
+              loading ? <SkeletonCards /> : 
+                vamArtData?.map((a, i) => (
+                  <GalleryCard 
+                    key={i} 
+                    title={a._primaryTitle ? a._primaryDate :a.objectType} 
+                    imgURL={`https://framemark.vam.ac.uk/collections/${a._primaryImageId}/full/735,/0/default.jpg`}
+                    dateCreation={a._primaryDate}
+                    region={a._primaryPlace} 
+                    restPayload={[{type: 'Type', data:a.objectType}]}
+                  />
 
-          })
+
+                ))
+            }
+
+          {
+          
+            loading ? <SkeletonCards /> : 
+              hamArtData?.map((a, i) => (
+                <GalleryCard 
+                  key={i} 
+                  title={a.title} 
+                  imgURL={a.primaryimageurl}
+                  dateCreation={a.dated}
+                  restPayload={[
+                    {type: 'Classification', data:a.classification},
+                    {type: 'Culture', data: a.culture}           
+                  ]}
+                />
+
+              ))
           }
 
-          <Stack align='center'>
-          {/* <Button width='20vw' size="sm" onClick={fetchMetData}>Send Data</Button> */}
-          </Stack>
+          
+          {
+            !loading &&
+              smgArtData?.map((a, i) => (
+                <GalleryCard 
+                  key={i} 
+                  title={a.attributes.summary_title} 
+                  imgURL={`https://coimages.sciencemuseumgroup.org.uk/images/${a.attributes.multimedia[0]?.processed.large.location}`}
+                  dateCreation={a.attributes.lifecycle?.creation[0].date && a.attributes.lifecycle.creation[0].date[0].value}
+                  restPayload={[
+                    a.attributes.categories && {type: 'Category', data: a.attributes.categories[0].name}
+                  ]}
+                />
+
+              ))
+          }
+
+          {
+            !loading &&
+              mvcArtData?.map((a, i) => (
+                <GalleryCard 
+                  key={i} 
+                  title={a.displayTitle} 
+                  imgURL={a.media[0].large.uri}
+                  dateCreation={a.associations[0].date}
+                  region={a.associations[0].country}
+                />
+
+              ))
+          }
+
+          {
+            !loading &&
+              aicArtData?.map((a, i) => (
+                <GalleryCard 
+                  key={i} 
+                  title={a.data.title} 
+                  imgURL={`https://www.artic.edu/iiif/2/${a.data.image_id}/full/843,/0/default.jpg`}
+                  dateCreation={a.data.date_display}
+                  region={a.data.place_of_origin}
+                  restPayload={[
+                    a.data.medium_display &&  {type: 'Type', data: a.data.medium_display},
+                    a.data.artist_display && {type: 'Creator', data: a.data.artist_display},
+                  ]}
+                />
+
+              ))
+          }
+       
           </VStack>
   );
 }
