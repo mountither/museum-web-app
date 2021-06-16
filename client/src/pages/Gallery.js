@@ -21,9 +21,6 @@ import {
   useParams
 } from "react-router-dom";
 
-import "@fontsource/raleway/400.css"
-import "@fontsource/open-sans/700.css"
-
 import AlertContent from '../components/AlertContent';
 import GalleryCard from '../components/GalleryCard';
 
@@ -48,14 +45,16 @@ const Gallery = ()=> {
   // used for the alert box.
 
   const location = useLocation();
-  useEffect(()=>{
-    setPageTitle(location.params.title)
-  },[location])
+  // useEffect(()=>{
+  //   console.log(location);
+  //   setPageTitle(location.state.title)
+  // },[location])
+
   const fetchMuseumObjects = async () =>{
    
     // testing potentail parameters
       //const params = {query:'Achaemenid', start: -600, end: -330};
-      const params = {query: pageTitle, start: -7000, end: -1000};
+      const params = {query: location.state.title, start: -7000, end: -1000};
       //const params = {query: 'Mesopotamia', start: -1, end: 1000};
       //const params = {query: 'Iraq', start: -331, end: -140};
      // const params = {query:'Iraq', start: -5000, end: 1400};
@@ -65,24 +64,24 @@ const Gallery = ()=> {
 
       const tempErrorArr = [];
       
-      const [METRes, METError] = await getMETResponse(params);
+      // const [METRes, METError] = await getMETResponse(params);
 
-      !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
+      // !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
       
-      const [VAMRes, VAMError] = await getVAMResponse(params);
+      // const [VAMRes, VAMError] = await getVAMResponse(params);
 
-      !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
-      const [HAMRes, HAMError] = await getHAMResponse(params);
+      // !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
+      // const [HAMRes, HAMError] = await getHAMResponse(params);
 
-      !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
+      // !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
 
       // const [SMGRes, SMGError] = await getSMGResponse(params);
 
       // !SMGError ? setSMGArtData(SMGRes.data.data) : tempErrorArr.push(SMGError);
 
-      const [MVCRes, MVCError] = await getMVCResponse(params);
+      // const [MVCRes, MVCError] = await getMVCResponse(params);
 
-      !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
+      // !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
 
       const [AICRes, AICError] = await getAICResponse(params);
       console.log(AICRes);
@@ -252,6 +251,7 @@ const Gallery = ()=> {
 
   useEffect(() =>{
    fetchMuseumObjects();
+   window.scrollTo(0,0);
   }, [])
 
   return (
@@ -274,7 +274,7 @@ const Gallery = ()=> {
               fontSize={{lg:'9xl', base:'5xl'}} 
               marginLeft={3} 
               fontWeight="bold" 
-              fontStyle='italic'  >{pageTitle}<Divider/></Heading>
+              fontStyle='italic'  >{location.state.title}<Divider/></Heading>
 
                 <AlertContent errors={errors} />   
   

@@ -17,6 +17,7 @@ import {
   Link
 } from "react-router-dom";
 
+import "@fontsource/reem-kufi/400.css"
 
 const breakpoints = createBreakpoints({
   xs: "350px",
@@ -27,8 +28,8 @@ const breakpoints = createBreakpoints({
 })
 
 const fonts = {
-  heading: "Raleway",
-  body: "Raleway",
+  heading: "Reem Kufi",
+  body: "Reem Kufi",
 }
 
 const theme = extendTheme({ breakpoints, fonts})

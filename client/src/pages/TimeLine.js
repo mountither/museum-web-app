@@ -14,7 +14,9 @@ import { Box, Code, Text, VStack, Image, Heading, Divider, HStack,
   DrawerCloseButton,
   useDisclosure,
   Input,
-  Button
+  Button,
+  Fade,
+  useColorMode
         } from '@chakra-ui/react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
 import ImageDistort from '../utils/ImageDistort';
@@ -27,13 +29,16 @@ import TimelineContent from '@material-ui/lab/TimelineContent';
 import TimelineDot from '@material-ui/lab/TimelineDot';
 import TimelineOppositeContent from "@material-ui/lab/TimelineOppositeContent";
 
-import ExtractRandomElements from "../utils/ExtractRandomElements";
+//https://github.com/rafgraph/detect-it#detection-details
+// dont render mouse over img distort for touch screens and hybrid.
+import {
+  deviceType,
+} from 'detect-it';
 
-import i1 from '../assets/i1.png';
-import i2 from '../assets/i2.png';
-import i3 from '../assets/i3.png';
-import i4 from '../assets/i4.png';
-import i5 from '../assets/i5.png';
+
+import Distort1 from '../assets/distort01.jpg'
+import SmoothScroll from '../utils/SmoothScroll';
+
 
 // TODO - either character with image distort bg or map with major cities with image distort of relevant pieces.
 
@@ -45,11 +50,11 @@ const TimeLine =() => {
       "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/N-Mesopotamia_and_Syria_english.svg/1280px-N-Mesopotamia_and_Syria_english.svg.png"
     ]
 
+    const { colorMode } = useColorMode()
+
     const { isOpen, onOpen, onClose } = useDisclosure()
     const boxClickRef = React.useRef()
     const [histData, setHistData] = useState([]);
-    const [intro, setIntro] = useState([]);
-    const [isDesktop, setIsDesktop] = useState(false);
 
     const [drawerContent, setDrawerContent] = useState({});
 
@@ -71,23 +76,57 @@ const TimeLine =() => {
             );
         console.log(filterPageCont);
 
-        setIntro(pageContent.filter(topic => {
-          return topic.title == "Short outline of Mesopotamia"
-        }));
+        // setIntro(pageContent.filter(topic => {
+        //   return topic.title == "Short outline of Mesopotamia"
+        // }));
+        const itemsArr = [];
+        filterPageCont.map((c, i) =>{
+          c.items?.map((ci, i) => {
+            itemsArr.push(ci);
+            fetchPeriodWikiPage(ci.title);
+          })
+        })
 
-        setHistData(filterPageCont);
-        setIsDesktop(window.innerWidth > 1200)
+        setHistData(itemsArr);
+        
+        // console.log(window.addEventListener("resize", ));
         }catch(error){
             console.log(error);
         }
     }
 
+    const fetchPeriodWikiPage = async(title) => {
 
+      try{
+
+        const searchResponse = await wiki({
+          apiUrl: 'https://en.wikipedia.org/w/api.php'
+        }).find(title)
+        
+    
+        const pageInfo = await searchResponse.info();
+
+        console.log(pageInfo);
+      }
+      catch(error){
+        console.log(error);
+      }
+
+    }
 
     useEffect(() => {
        fetchWikiPageContent();
 
-      
+      //  function handleResize() {
+      //   console.log('resized to: ', window.innerWidth, 'x', window.innerHeight)
+        // setIsDesktop(window.innerWidth > 1200);
+
+      // }
+  
+      // window.addEventListener('resize', handleResize)
+      // return _ => {
+      //   window.removeEventListener('resize', handleResize)
+      // }
 
     }, [])
 
@@ -95,6 +134,7 @@ const TimeLine =() => {
       onOpen();
       setDrawerContent({title: title, content: content});
     }
+
 
     return (
 
@@ -106,54 +146,79 @@ const TimeLine =() => {
 
       <VStack >
 
-      <Heading 
-       
-       marginTop={10} 
-       gridArea={'1/1/2/3'} 
-       fontSize={{lg:'9xl', base:'5xl'}} 
-       marginLeft={3} 
-       fontWeight="bold" 
-       fontStyle='italic'  >Mesopotamia</Heading>
-    <Divider/>
+          <Heading 
+          zIndex='1'
+          marginTop={10} 
+          gridArea={'1/1/2/3'} 
+          fontSize={{lg:'9xl', base:'5xl'}} 
+          marginLeft={3} 
+          fontWeight='light' 
+          fontStyle='italic'  
+        >Mesopotamia
+        </Heading>
+      <Divider/>
+    </VStack>
+
+  
+    { deviceType == 'mouseOnly' ? 
     
-    <VStack className='myListRoot' spacing='30px'>
+    <VStack spacing={15} className='myListRoot' marginTop='100px !important' marginBottom='100px !important'>
       {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
       <Box className='myListItem'>
       {/* Country of the noble lords */}
-      <Text  fontSize="100px" _hover={{color:'white'}} >𒆠𒂗𒄀</Text>
-      <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/7/79/Enthroned_King_of_Ur.jpg"} />
-      </Box>
-      <Box className='myListItem'>
-      <Text fontSize="100px" _hover={{color:'white'}} >𒆠𒂗𒄀</Text>
+      <Text  fontSize="100px" _hover={{color: 'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}}>𒆠𒂗𒄀</Text>
       <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Standard_of_Ur_-_War.jpg/640px-Standard_of_Ur_-_War.jpg"} />
       </Box>
       <Box className='myListItem'>
-      <Text fontSize="100px" _hover={{color:'white'}} >𒆠𒂗𒄀</Text>
+      <Text fontSize="100px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
+      <img hidden src={Distort1} />
+      </Box>
+      <Box className='myListItem'>
+      <Text fontSize="100px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
       <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ea_%28Babilonian%29_-_EnKi_%28Sumerian%29.jpg"} />
 
       </Box>
-    </VStack>
-    {isDesktop &&  <ImageDistort
-                    styles={{ zIndex: -10 }}
-                    listRoot={".myListRoot"}
-                    itemRoot={".myListItem"}
-                    options={{
-                      strength: 0.5,
-                      effect: "redshift",
-                      geometry: {
-                        shape: "plane",
-                        // radius: 0.4,
-                        segments: 128,
-                        width: 0.5,
-                        height: 0.5
-                        
-                      }
-                    }}
-                  />}
-       </VStack>
+      <ImageDistort
+                      styles={{ zIndex: -10 }}
+                      listRoot={".myListRoot"}
+                      itemRoot={".myListItem"}
+                      options={{
+                        strength: 0.5,
+                        effect: "redshift",
+                        geometry: {
+                          shape: "plane",
+                          // radius: 0.4,
+                          // segments: 128,
+                          width: 0.8,
+                          height: 0.8
+                          
+                        }
+                      }}
+                    />
+      </VStack>
+    : 
+    <SmoothScroll>
+
+    <VStack spacing='30px' zIndex='-10'  opacity='0.4'>
+      {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
+      <Box >
+      {/* Country of the noble lords */}
+      <img  src={"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Standard_of_Ur_-_War.jpg/640px-Standard_of_Ur_-_War.jpg"} />
+      </Box>
+      <Box >
+      <img  src={Distort1} />
+      </Box>
+      <Box>
+      <img src={"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ea_%28Babilonian%29_-_EnKi_%28Sumerian%29.jpg"} />
+
+      </Box>
+      </VStack>
+    </SmoothScroll>
+
+    }
 
 
-      <Box marginTop={10} padding={3} >
+      <Box padding={3} >
 
 
         <Timeline align='alternate' className="myListRoot" >
@@ -161,51 +226,45 @@ const TimeLine =() => {
           {histData.map((c,i) => {
               return(
 
-                c.items && 
-                c.items.map((cc,ci) => (
-                  <TimelineItem key={ci} >
-
+                  <TimelineItem key={i} >
                     <TimelineSeparator >
                       <TimelineDot />
                       <TimelineConnector />
 
                     </TimelineSeparator>
 
-                    <TimelineContent>
+                      <TimelineContent>
+
                         <Box 
                           ref={boxClickRef} 
-                          onClick={() => onOpenDrawer(cc.title, cc.content)}
-                          border='1px' 
+                          onClick={() => onOpenDrawer(c.title, c.content)}
                           maxWidth='4xl' 
                           transition='0.5'
                           _hover={{backgroundColor:'beige', color:'black', transition:'0.5s ease', webkittransition:' 0.5s ease'}} 
                           // padding='10px' 
+                          borderBottom='1px'
                           cursor='pointer'
                           transition='0.5s ease'
                           webkittransition='0.5s ease'
                           align='center'
                             >
                           <Box overflow="hidden" >
-                          <Image  _hover={{transform: 'scale(1.1)'}}  transition='transform .6s' objectFit="contain" 
+                          <Image  _hover={{transform: 'scale(1.05)'}}  transition='transform .9s' objectFit="contain" 
                           src={'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Anubanini_extracted.jpg/1920px-Anubanini_extracted.jpg'}/>
                           </Box>
-                          <Text fontWeight='extrabold' fontSize={{ base:'10px', lg: "22px" }} key={ci}>{cc.title}</Text>
+                          <Text fontWeight='hairline' fontSize={{ base:'10px', lg: "22px" }}>{c.title}</Text>
+                         
                         </Box>
-
-                    </TimelineContent>
-                  
-                   
+                        </TimelineContent>         
                 </TimelineItem>
                 )
-              )
-              )
-          }
-        )}
+              }
+            )}
           
         </Timeline>
     
       </Box>
-      
+
       <Drawer
           isOpen={isOpen}
           placement="left"
@@ -213,23 +272,21 @@ const TimeLine =() => {
           finalFocusRef={boxClickRef}
           size='xl'
           isCentered='true'
-        >
+          >
           <DrawerOverlay />
           <DrawerContent>
             <DrawerCloseButton  />
               <DrawerHeader>{drawerContent.title}</DrawerHeader>
 
-              <DrawerBody>
+              <DrawerBody padding={{ base: 10, lg: 20 }}>
                 <Text>{drawerContent.content}</Text>
-                <Link to={{ pathname: '/gallery', params:{ title : drawerContent.title}}}>
-                <Button  size='lg' variant="outline" colorScheme='cyan' mt={20}>
-                  Discover Artefacts in this period</Button></Link>
+              
               </DrawerBody>
               
               <DrawerFooter>
-                <Button variant="outline" mr={3} onClick={onClose}>
-                  Close
-                </Button>
+              <Link to={{ pathname: '/gallery', state:{ title : drawerContent.title}}}>
+                <Button  size='lg' variant="outline"  mt={20}>
+                  Discover Artefacts from this period</Button></Link>
               </DrawerFooter>
             </DrawerContent>
           </Drawer>

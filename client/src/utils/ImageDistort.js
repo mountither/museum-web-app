@@ -61,6 +61,8 @@ class ImageDistort extends Component {
       return;
     }
 
+
+
     this.setup();
     this.listItems = this.getListItems({
       selector: this.props.listRoot
@@ -77,14 +79,17 @@ class ImageDistort extends Component {
       console.warn("Could not find any listItems using the supplied root props. Please make sure they are correct.");
       return;
     }
-
+      
     this.createEventsListeners({
-      items: this.listItems
-    });
+        items: this.listItems
+      });
+    
+    
     this.init();
   }
 
   componentDidUpdate(prevProps) {
+    
     this.init();
   }
 
@@ -120,9 +125,10 @@ class ImageDistort extends Component {
     // get normalized mouse position on viewport
     try
     {
-      this.mouse.x = event.clientX / this.mount.clientWidth * 2 - 1;
-      this.mouse.y = -(event.clientY / this.mount.clientHeight) * 2 + 1;
-      this.onMouseMove(event);
+        this.mouse.x = event.clientX / this.mount.clientWidth * 2 - 1;
+        this.mouse.y = -(event.clientY / this.mount.clientHeight) * 2 + 1;
+        this.onMouseMove(event);
+      
     }
     catch(error)
     {
@@ -499,11 +505,12 @@ class ImageDistort extends Component {
   createEventsListeners({
     items
   }) {
-    items.forEach((item, index) => {
-      item.element.addEventListener("mouseover", this._onMouseOver.bind(this, index), false);
-    });
-    this.listWrapper.addEventListener("mousemove", this._onMouseMove.bind(this), false);
-    this.listWrapper.addEventListener("mouseleave", this._onMouseLeave.bind(this), false);
+      items.forEach((item, index) => {
+        item.element.addEventListener("mouseover", this._onMouseOver.bind(this, index), false);
+      });
+
+      this.listWrapper.addEventListener("mousemove", this._onMouseMove.bind(this), false);
+      this.listWrapper.addEventListener("mouseleave", this._onMouseLeave.bind(this), false);
   }
 
   onWindowResize() {
