@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ExtractRandomElements = (arr, n) => {
+export const ExtractRandomElements = (arr, n) => {
 
     var result = new Array(n),
       len = arr.length,
@@ -15,4 +15,6 @@ const ExtractRandomElements = (arr, n) => {
     return result;
 }
 
-export default ExtractRandomElements;
+export const RandomArrayIndex = (size) => {
+    return Math.floor(Math.random()*size);
+} 

@@ -18,6 +18,7 @@ import { Box, Code, Text, VStack, Image, Heading, Divider, HStack,
   Button,
   Fade,
   Collapse,
+  Flex,
   useColorMode
         } from '@chakra-ui/react';
 import { ColorModeSwitcher } from '../ColorModeSwitcher';
@@ -41,7 +42,7 @@ import Distort1 from '../assets/distort01.jpg'
 import SmoothScroll from '../utils/SmoothScroll';
 import { Swiper, SwiperSlide } from "swiper/react";
 
-
+import {ExtractRandomElements} from '../utils/ArrayHelpers'
 import "swiper/swiper.min.css";
 import "swiper/components/pagination/pagination.min.css"
 import "./styles/timeline.css"
@@ -50,12 +51,13 @@ import "./styles/timeline.css"
 import SwiperCore, {
   Pagination
 } from 'swiper/core';
+import SkeletonIntro from '../components/Skeletons/SkeletonIntro';
+import SkeletonCards from '../components/Skeletons/SkeletonCards';
 
 // install Swiper modules
 SwiperCore.use([Pagination]);
 
 // TODO - either character with image distort bg or map with major cities with image distort of relevant pieces.
-
 const TimeLine =() => {
 
     const images =[
@@ -73,10 +75,14 @@ const TimeLine =() => {
     const [drawerContent, setDrawerContent] = useState({});
 
     const [isLargerThan1280] = useMediaQuery("(min-width: 960px)");
-    
-    
+
+    const [fetchingWikiData, setFetchingWikiData] = useState(true);
+  
     const fetchWikiPageContent = async () =>{
       try {
+
+        setFetchingWikiData(true);
+
         const pageResponse = await wiki({
             apiUrl: 'https://en.wikipedia.org/w/api.php'
           }).page("History_of_Mesopotamia")
@@ -91,24 +97,30 @@ const TimeLine =() => {
             && c.title !== 'Short outline of Mesopotamia'
             )
             );
-        console.log(filterPageCont);
-
-        // setIntro(pageContent.filter(topic => {
-        //   return topic.title == "Short outline of Mesopotamia"
-        // }));
 
         // imgs to be appended
         const itemsArr = [];
-        filterPageCont.forEach((c, i) =>{
-          c.items?.forEach((ci, i) => {
-            ci.images = fetchPeriodWikiPage(ci.title);
+        await filterPageCont.map((c, i) =>{
+          c.items?.map((ci, i) => {
+            if(ci.title == "Early Dynastic period"){
+              ci.title = "Early Dynastic period (Mesopotamia)"
+            }
             itemsArr.push(ci);
           })
-        })
-        console.log(itemsArr);
-        setHistData(itemsArr);
+        });
 
-        // console.log(window.addEventListener("resize", ));
+        await Promise.all(
+          itemsArr.map(async (item) =>{
+          item.images = await fetchPeriodWikiPage(item.title);
+          }
+        ))
+
+        setHistData(itemsArr);
+        // store array in session
+        sessionStorage.setItem('TLData', JSON.stringify(itemsArr));
+
+        setFetchingWikiData(false);
+
         }catch(error){
             console.log(error);
         }
@@ -116,43 +128,52 @@ const TimeLine =() => {
 
     const fetchPeriodWikiPage = async(title) => {
 
-      try{
+      // const test = await wiki({
+      //   apiUrl: 'https://en.wikipedia.org/w/api.php'
+      // }).find(title)
 
-        const searchResponse = await wiki({
-          apiUrl: 'https://en.wikipedia.org/w/api.php'
-        }).find(title)
-        
-        const pageImages = await searchResponse.images();
-        const excludeSVG = pageImages.filter(img => {
-          return img.includes('jpg');
+      // console.log(title, testInfo)
+      // find() searches and returns the first wiki page.
+      const searchResponse = await wiki({
+        apiUrl: 'https://en.wikipedia.org/w/api.php'
+      }).find(title)
+      const pageImages = await searchResponse.images();
+      const pageInfo = await searchResponse.info();
+      console.log(pageInfo)
+      const imgExtRegex = "https?:\/\/.*\.(?:png|jpg|JPG|PNG)";
+      const excludeSVG = pageImages.filter(img => {
+        return img.match(imgExtRegex);
       });
 
-      return excludeSVG;
+      // var finalImgs = [];
+      // if(excludeSVG.length < 10){
+      //   finalImgs = excludeSVG;
+      // }
+      // else{
+      //   finalImgs = excludeSVG.slice(0, 10);
 
-      }
-      catch(error){
-        console.log(error);
-      }
+      // }
 
+      // return finalImgs;
+
+      return ExtractRandomElements(excludeSVG, excludeSVG.length < 5 ? 1 : 5);
     }
 
     useEffect(() => {
-       fetchWikiPageContent();
-
-      //  function handleResize() {
-      //   console.log('resized to: ', window.innerWidth, 'x', window.innerHeight)
-        // setIsDesktop(window.innerWidth > 1200);
-
-      // }
-  
-      // window.addEventListener('resize', handleResize)
-      // return _ => {
-      //   window.removeEventListener('resize', handleResize)
-      // }
-
+      //  if TL Data is empty, fetch from wiki api
+      if(sessionStorage.getItem("TLData") != null && sessionStorage.getItem("TLData") != "[]"){
+        // console.log('dsga ', sessionStorage.getItem('TLData') )
+        const LSHist = JSON.parse(sessionStorage.getItem('TLData'));
+        setHistData(LSHist);
+        setFetchingWikiData(false);
+      }
+      else{
+        console.log('fetching')
+        fetchWikiPageContent();
+      }
     }, [])
 
-    const onOpenDrawer= (title, content, subcontents = null, images)=>{
+    const onOpenDrawer= (title, content, subcontents = null, images = null)=>{
       onOpen();
       setDrawerContent({title: title, content: content, subContents: subcontents, images: images});
     }
@@ -171,81 +192,100 @@ const TimeLine =() => {
           zIndex='1'
           marginTop={10} 
           gridArea={'1/1/2/3'} 
-          fontSize={{lg:'9xl', base:'5xl'}} 
+          fontSize={{lg:'9xl', base:'6xl'}} 
           marginLeft={3} 
-          fontWeight='light' 
-          fontStyle='italic'  
+          textTransform='uppercase'
         >Land Of Rivers
         </Heading>
       <Divider/>
     </VStack>
 
+
+    {deviceType == 'mouseOnly' ? 
+
   
-    { deviceType == 'mouseOnly' ? 
 
-    <VStack spacing={0} className='myListRoot' marginTop='100px !important' marginBottom='100px !important'>
-      {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
-      <Box className='myListItem'>
-      {/* Country of the noble lords */}
-      <Text  fontSize="100px" _hover={{color: 'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}}>𒆠𒂗𒄀</Text>
-      <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Standard_of_Ur_-_War.jpg/640px-Standard_of_Ur_-_War.jpg"} />
-      </Box>
-      <Box className='myListItem' >
-      <Text fontSize="100px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
-      <img hidden src={Distort1} />
-      </Box>
-      <Box className='myListItem'>
-      <Text fontSize="100px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
-      <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ea_%28Babilonian%29_-_EnKi_%28Sumerian%29.jpg"} />
+       <VStack spacing={0} className='ImageDistortRoot' marginTop='100px !important' marginBottom='100px !important'>
+        {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
+        
+          <Box className='ImageDistortItem'>
+            {/* Country of the noble lords */}
+            {fetchingWikiData ? 
+              <SkeletonIntro /> : 
+                <>
+                <Text fontSize="80px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
+            <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ea_%28Babilonian%29_-_EnKi_%28Sumerian%29.jpg"} /> 
+                </>
+            }
+          </Box>
 
-      </Box>
+          <Box className='ImageDistortItem' >
+          {fetchingWikiData ? 
+            <SkeletonIntro /> : 
+              <>
+            <Text fontSize="80px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
+            <img hidden src={Distort1} />
+            </>
+          }
+          </Box>
+          <Box className='ImageDistortItem'>
+          {fetchingWikiData ? 
+            <SkeletonIntro /> : 
+              <>
+               <Text  fontSize="80px" _hover={{color: 'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}}>𐎧𐏁𐎠𐎹𐎰𐎡𐎹</Text>
+                <img hidden src={"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Standard_of_Ur_-_War.jpg/640px-Standard_of_Ur_-_War.jpg"} />
+              </>
+          }
+          </Box>
 
-      <ImageDistort
-                      styles={{ zIndex: -10 }}
-                      listRoot={".myListRoot"}
-                      itemRoot={".myListItem"}
-                      options={{
-                        strength: 0.5,
-                        effect: "redshift",
-                        geometry: {
-                          shape: "plane",
-                          // radius: 0.4,
-                          // segments: 128,
-                          width: 0.8,
-                          height: 0.8
-                          
-                        }
-                      }}
-                    />
-      </VStack>
-    : 
-    <SmoothScroll>
+        {!fetchingWikiData && <ImageDistort
+                        styles={{ zIndex: -10 }}
+                        listRoot={".ImageDistortRoot"}
+                        itemRoot={".ImageDistortItem"}
+                        options={{
+                          strength: 0.5,
+                          effect: "redshift",
+                          geometry: {
+                            shape: "plane",
+                            // radius: 0.4,
+                            // segments: 128,
+                            width: 0.8,
+                            height: 0.8
+                            
+                          }
+                        }}
+                      />}
+        </VStack>
+      
+      : 
+      <SmoothScroll>
 
-    <VStack spacing='30px' zIndex='-10'  opacity='0.4' >
-      {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
-      <Box >
-      {/* Country of the noble lords */}
-      <img  src={"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Standard_of_Ur_-_War.jpg/640px-Standard_of_Ur_-_War.jpg"} />
-      </Box>
-      <Box >
-      <img  src={Distort1} />
-      </Box>
-      <Box>
-      <img src={"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ea_%28Babilonian%29_-_EnKi_%28Sumerian%29.jpg"} />
+      <VStack spacing='30px' zIndex='-10'  opacity='0.4' >
+        {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
+        <Box >
+        {/* Country of the noble lords */}
+        <img  src={"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Standard_of_Ur_-_War.jpg/640px-Standard_of_Ur_-_War.jpg"} />
+        </Box>
+        <Box >
+        <img  src={Distort1} />
+        </Box>
+        <Box>
+        <img src={"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ea_%28Babilonian%29_-_EnKi_%28Sumerian%29.jpg"} />
 
-      </Box>
-      </VStack>
-    </SmoothScroll>
-
+        </Box>
+        </VStack>
+      </SmoothScroll>
     }
 
+      <Divider width='50vw' />
 
       <Box padding={0}>
 
+      {fetchingWikiData ? <Code fontSize='25px'>Building Timeline...</Code> :
 
         <Timeline align={isLargerThan1280 ? 'alternate' : 'left'} className="myListRoot">
 
-          {histData.map((c,i) => {
+          {histData?.map((c,i) => {
               return(
 
                   <TimelineItem key={i} >
@@ -261,22 +301,22 @@ const TimeLine =() => {
                       <TimelineContent style={{marginBottom:'5vh'}}>
                         <Box
                           ref={boxClickRef} 
-                          onClick={() => onOpenDrawer(c.title, c.content, c.items &&c.items, c.images)}
+                          onClick={() => onOpenDrawer(c.title, c.content, c.items &&c.items, c.images && c.images)}
                           maxWidth='4xl' 
                           width={!isLargerThan1280 && '50vw'}
-                          _hover={{backgroundColor:'beige', color:'black', transition:'0.7s ease', webkittransition:'0.7s ease'}} 
                           // padding='10px' 
                           borderBottom='0.5px solid grey'
                           cursor='pointer'
-                          transition='0.5s ease'
-                          webkittransition='0.5s ease'
                           align='center'
                             >
                           <Box overflow="hidden" >
                           <Image  _hover={{transform: 'scale(1.05)'}}  transition='transform .9s' objectFit="contain" 
-                          src={'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Anubanini_extracted.jpg/1920px-Anubanini_extracted.jpg'}/>
-                          </Box>
-                          <Text fontWeight='hairline' fontSize={{ base:'10px', lg: "22px" }}>{c.title}</Text>
+                          src={c.images && c.images[c.images.length-1]}/>
+                      
+                      </Box>  
+
+                          <Text 
+                           fontSize={{ base:'10px', lg: "22px" }}>{c.title}</Text>
                          
                         </Box>
                         </TimelineContent>         
@@ -286,7 +326,7 @@ const TimeLine =() => {
             )}
           
         </Timeline>
-    
+    }
       </Box>
 
      {isOpen && <Drawer
@@ -296,6 +336,7 @@ const TimeLine =() => {
           finalFocusRef={boxClickRef}
           size='xl'
           isCentered='true'
+          colorScheme='blackAlpha'
           >
           <DrawerOverlay />
           <DrawerContent>
@@ -314,9 +355,9 @@ const TimeLine =() => {
                   </Box>
                 ))}
                 <Swiper pagination={true} className="swiper">
-                    {images.map((img, i) => (
+                    {drawerContent.images && drawerContent.images.map((img, i) => (
                       <SwiperSlide key={i}>
-                        <Image src={img}/>
+                        <Image src={img} fallback={<Code>Fetching Image...</Code>}/>
                       </SwiperSlide>
                     )
                     )
@@ -324,11 +365,15 @@ const TimeLine =() => {
                 </Swiper>
               </DrawerBody>
               
-              <DrawerFooter>
+          <Flex justify='center'>
+              <DrawerFooter >
+
+
               <Link to={{ pathname: '/gallery', state:{ title : drawerContent.title}}}>
                 <Button  size='lg' variant="outline"  mt={20}>
                   Discover Artefacts from this period</Button></Link>
               </DrawerFooter>
+          </Flex>
             </DrawerContent>
           </Drawer>}
       </VStack>

@@ -13,7 +13,7 @@ import { ColorModeSwitcher } from '../ColorModeSwitcher';
 
 import axios from 'axios';
 
-import SkeletonCards from "../components/SkeletonCards";
+import SkeletonCards from "../components/Skeletons/SkeletonCards";
 
 import {
   Link,
@@ -25,14 +25,13 @@ import {
 import AlertContent from '../components/AlertContent';
 import GalleryCard from '../components/GalleryCard';
 
-
 // TODO - Implement a Load more feature (pagination)
 
-const Gallery = ()=> { 
+const Gallery = ()=> {
 
   const [metArtData, setMETArtData] = useState([]);
   const [vamArtData, setVAMArtData] = useState([]);
-  const [hamArtData, setHAMArtData] = useState([]);
+  const [hamArtData, setHAMArtData] =useState([]);
   const [smgArtData, setSMGArtData] = useState([]);
   const [mvcArtData, setMVCArtData] = useState([]);
   const [aicArtData, setAICArtData] = useState([]);
@@ -68,22 +67,30 @@ const Gallery = ()=> {
       
       const [METRes, METError] = await getMETResponse(params);
 
-      !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
+      // !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
+      if(!METError){
+        setMETArtData(METRes);
+        sessionStorage.setItem('METData', JSON.stringify(METRes));
+
+      }
+      else{
+        tempErrorArr.push(METError);
+      }
       
-      const [VAMRes, VAMError] = await getVAMResponse(params);
+      // const [VAMRes, VAMError] = await getVAMResponse(params);
 
-      !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
-      const [HAMRes, HAMError] = await getHAMResponse(params);
+      // !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
+      // const [HAMRes, HAMError] = await getHAMResponse(params);
 
-      !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
+      // !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
 
-      const [SMGRes, SMGError] = await getSMGResponse(params);
+      // const [SMGRes, SMGError] = await getSMGResponse(params);
 
-      !SMGError ? setSMGArtData(SMGRes.data.data) : tempErrorArr.push(SMGError);
+      // !SMGError ? setSMGArtData(SMGRes.data.data) : tempErrorArr.push(SMGError);
 
-      const [MVCRes, MVCError] = await getMVCResponse(params);
+      // const [MVCRes, MVCError] = await getMVCResponse(params);
 
-      !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
+      // !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
 
       // const [AICRes, AICError] = await getAICResponse(params);
       // console.log(AICRes);
@@ -252,9 +259,18 @@ const Gallery = ()=> {
   }
 
   useEffect(() =>{
-   fetchMuseumObjects();
-   window.scrollTo(0,0);
+    window.scrollTo(0,0);
 
+    if(sessionStorage.getItem("METData") != null && sessionStorage.getItem("METData") != "[]"){
+      const METData = JSON.parse(sessionStorage.getItem('METData'));
+      setMETArtData(METData);
+      setLoading(false);
+    }
+    else{
+      fetchMuseumObjects();
+
+    }
+    
 
   }, [])
 
@@ -283,7 +299,6 @@ const Gallery = ()=> {
               fontSize={{lg:'9xl', base:'5xl'}} 
               marginLeft={3} 
               fontWeight="hairline" 
-              fontStyle='italic'
               textTransform='capitalize'
                >{location.state.title}<Divider/></Heading>
 
@@ -353,7 +368,7 @@ const Gallery = ()=> {
                   key={i} 
                   title={a.attributes.summary_title} 
                   imgURL={`https://coimages.sciencemuseumgroup.org.uk/images/${a.attributes.multimedia[0]?.processed.large.location}`}
-                  dateCreation={a.attributes.lifecycle?.creation[0].date && a.attributes.lifecycle.creation[0].date[0].value}
+                  dateCreation={(a.attributes.lifecycle?.creation?.date) && a.attributes.lifecycle.creation[0].date[0].value}
                   restPayload={[
                     a.attributes.categories && {type: 'Category', data: a.attributes.categories[0].name}
                   ]}

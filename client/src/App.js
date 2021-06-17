@@ -2,8 +2,10 @@ import React from 'react';
 import {
   ChakraProvider,
   extendTheme ,
-  withDefaultColorScheme
+  withDefaultColorScheme,
 } from '@chakra-ui/react';
+import { mode } from '@chakra-ui/theme-tools';
+
 import { createBrowserHistory } from "history";
 
 import Gallery from './pages/Gallery';
@@ -17,7 +19,7 @@ import {
   Link
 } from "react-router-dom";
 
-import "@fontsource/reem-kufi/400.css"
+import "@fontsource/cardo/400.css"
 
 const breakpoints = createBreakpoints({
   xs: "350px",
@@ -28,11 +30,30 @@ const breakpoints = createBreakpoints({
 })
 
 const fonts = {
-  heading: "Reem Kufi",
-  body: "Reem Kufi",
+  heading: "Cardo",
+  body: "Cardo",
 }
+const styles = {
+  global: props => ({
+    body: {
+      color: mode('gray.800', 'whiteAlpha.900')(props),
+      bg: mode('gray.200', '#141214')(props),
+    },
+  }),
+};
 
-const theme = extendTheme({ breakpoints, fonts})
+const components = {
+  Drawer: {
+    // setup light/dark mode component defaults
+    baseStyle: props => ({
+      dialog: {
+        bg: mode('white', '#1b1b1c')(props),
+      },
+    }),
+  },
+};
+
+const theme = extendTheme({styles, components, breakpoints, fonts})
 
 const history = createBrowserHistory();
 

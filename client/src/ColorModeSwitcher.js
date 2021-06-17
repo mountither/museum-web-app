@@ -7,22 +7,35 @@ import MoonStarToggle from './assets/moonstar_toggle.png';
 
 export const ColorModeSwitcher = props => {
 
-  const { toggleColorMode } = useColorMode();
-  const text = useColorModeValue('dark', 'light');
-  const SwitchIcon = useColorModeValue(MoonStarToggle, SunToggle);
+  const { toggleColorMode, colorMode} = useColorMode();
+  
+  // const text = useColorModeValue('dark', 'light');
+  // const SwitchIcon = useColorModeValue(MoonStarToggle, SunToggle);
 
+  // seperate image components. prev method not working in safari.
   return (
+    <>
+  {  colorMode == 'light' ?
     <Image
       cursor = 'pointer'
-      aria-label={`Switch to ${text} mode`}
+      // aria-label={`Switch to ${text} mode`}
       marginLeft="3"
       width={10}
-      src={SwitchIcon}
+      src={MoonStarToggle }
       onClick={toggleColorMode}
-      // icon={<SwitchIcon />}
       {...props}
     />
-
-  
+    : 
+      <Image
+      cursor = 'pointer'
+      // aria-label={`Switch to ${text} mode`}
+      marginLeft="3"
+      width={10}
+      src={SunToggle }
+      onClick={toggleColorMode}
+      {...props}
+    />
+    }
+    </>
   );
 };
