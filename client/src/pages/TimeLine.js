@@ -249,7 +249,7 @@ const TimeLine =() => {
           fontSize={{lg:'9xl', base:'6xl'}} 
           paddingLeft={10}
           textTransform='uppercase'
-        >Land Of Rivers
+        >The Land Of Rivers
         </Heading>
       <Divider zIndex='-11'/>
     </VStack>
