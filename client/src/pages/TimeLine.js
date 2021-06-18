@@ -123,7 +123,7 @@ const TimeLine =() => {
           [item.images, item.dates, item.nationsToday, item.majorReligion] = await fetchPeriodWikiData(item.title);
           }
         ))
-          // console.log(itemsArr)
+        console.log(itemsArr)
         setHistData(itemsArr);
         try{
           sessionStorage.setItem('TLData', JSON.stringify(itemsArr));
@@ -151,7 +151,7 @@ const TimeLine =() => {
       const pageImages = await searchResponse.images();
       const pageInfo = await searchResponse.fullInfo();
 
-      const dates = pageInfo.general ? extractDates(pageInfo.general, title) : null;
+      const dates = await extractDates(pageInfo.general, title);
       const currentNations = pageInfo.general?.today?.join(', ') || null;
       const majorReligion = pageInfo.general?.religion || null;
 
