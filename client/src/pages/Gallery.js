@@ -160,7 +160,7 @@ const Gallery = ()=> {
     try{
 
       // fetch from harvard arts museum
-      const response = await axios.get(`https://api.harvardartmuseums.org/object?q=${params.query}&hasimage=1&sort=random&apikey=99b15ddf-1529-4233-bb39-15c16dee8685`);
+      const response = await axios.get(`https://api.harvardartmuseums.org/object?q=${params.query}&hasimage=1&sort=random&apikey=${process.env.REACT_APP_HAM_API_KEY}`);
       console.log("Count in HAM: (10 shown) ", response.data.info.totalrecords);
       return [response, null];
 
