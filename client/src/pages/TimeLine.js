@@ -123,7 +123,7 @@ const TimeLine =() => {
           [item.images, item.dates, item.nationsToday, item.majorReligion] = await fetchPeriodWikiData(item.title);
           }
         ))
-          console.log(itemsArr)
+          // console.log(itemsArr)
         setHistData(itemsArr);
         try{
           sessionStorage.setItem('TLData', JSON.stringify(itemsArr));
