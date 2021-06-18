@@ -9,7 +9,7 @@ import {
   Heading,
   
 } from '@chakra-ui/react';
-import { ColorModeSwitcher } from '../ColorModeSwitcher';
+import { ColorModeSwitcher } from '../components/ColorModeSwitcher';
 
 import axios from 'axios';
 

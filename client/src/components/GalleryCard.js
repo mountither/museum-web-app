@@ -15,13 +15,9 @@ import {
     Icon,
     Code ,
     Table,
-  Thead,
   Tbody,
-  Tfoot,
   Tr,
-  Th,
   Td,
-  TableCaption,
   useColorMode,
 
 } from '@chakra-ui/react';

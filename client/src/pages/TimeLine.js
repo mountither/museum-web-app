@@ -18,10 +18,14 @@ import { Box, Code, Text, VStack, Image, Heading, Divider, HStack,
   Button,
   Fade,
   Collapse,
+  Table,
+  Tbody,
+  Tr,
+  Td,
   Flex,
   useColorMode
         } from '@chakra-ui/react';
-import { ColorModeSwitcher } from '../ColorModeSwitcher';
+import { ColorModeSwitcher } from '../components/ColorModeSwitcher';
 import ImageDistort from '../utils/ImageDistort';
 
 import Timeline from '@material-ui/lab/Timeline';
@@ -31,6 +35,8 @@ import TimelineConnector from '@material-ui/lab/TimelineConnector';
 import TimelineContent from '@material-ui/lab/TimelineContent';
 import TimelineDot from '@material-ui/lab/TimelineDot';
 import TimelineOppositeContent from "@material-ui/lab/TimelineOppositeContent";
+
+
 //https://github.com/rafgraph/detect-it#detection-details
 // dont render mouse over img distort for touch screens and hybrid.
 import {
@@ -43,16 +49,19 @@ import SmoothScroll from '../utils/SmoothScroll';
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import {ExtractRandomElements} from '../utils/ArrayHelpers'
+
 import "swiper/swiper.min.css";
 import "swiper/components/pagination/pagination.min.css"
-import "./styles/timeline.css"
+import "./styles/swiper.css"
+
+
+
 
 // import Swiper core and required modules
 import SwiperCore, {
   Pagination
 } from 'swiper/core';
 import SkeletonIntro from '../components/Skeletons/SkeletonIntro';
-import SkeletonCards from '../components/Skeletons/SkeletonCards';
 
 // install Swiper modules
 SwiperCore.use([Pagination]);
@@ -111,13 +120,19 @@ const TimeLine =() => {
 
         await Promise.all(
           itemsArr.map(async (item) =>{
-          item.images = await fetchPeriodWikiPage(item.title);
+          [item.images, item.dates, item.nationsToday, item.majorReligion] = await fetchPeriodWikiData(item.title);
           }
         ))
-
+          console.log(itemsArr)
         setHistData(itemsArr);
+        try{
+          sessionStorage.setItem('TLData', JSON.stringify(itemsArr));
+
+        }
+        catch(error){
+          console.log('Failed to set data in session storage ', error);
+        }
         // store array in session
-        sessionStorage.setItem('TLData', JSON.stringify(itemsArr));
 
         setFetchingWikiData(false);
 
@@ -126,42 +141,83 @@ const TimeLine =() => {
         }
     }
 
-    const fetchPeriodWikiPage = async(title) => {
+    const fetchPeriodWikiData = async(title) => {
 
-      // const test = await wiki({
-      //   apiUrl: 'https://en.wikipedia.org/w/api.php'
-      // }).find(title)
-
-      // console.log(title, testInfo)
       // find() searches and returns the first wiki page.
       const searchResponse = await wiki({
         apiUrl: 'https://en.wikipedia.org/w/api.php'
       }).find(title)
+
       const pageImages = await searchResponse.images();
-      const pageInfo = await searchResponse.info();
-      console.log(pageInfo)
-      const imgExtRegex = "https?:\/\/.*\.(?:png|jpg|JPG|PNG)";
-      const excludeSVG = pageImages.filter(img => {
-        return img.match(imgExtRegex);
+      const pageInfo = await searchResponse.fullInfo();
+
+      const dates = pageInfo.general ? extractDates(pageInfo.general, title) : null;
+      const currentNations = pageInfo.general?.today?.join(', ') || null;
+      const majorReligion = pageInfo.general?.religion || null;
+
+      const includeRegex = /\b(jpg|JPG|png)\b/i
+      const excludeRegex = /\b(Blank|Blank_space)\b/i
+
+      const filteredImageURLs = pageImages.filter(img => {
+        return includeRegex.test(img) && !excludeRegex.test(img)
       });
 
-      // var finalImgs = [];
-      // if(excludeSVG.length < 10){
-      //   finalImgs = excludeSVG;
-      // }
-      // else{
-      //   finalImgs = excludeSVG.slice(0, 10);
-
-      // }
-
-      // return finalImgs;
-
-      return ExtractRandomElements(excludeSVG, excludeSVG.length < 5 ? 1 : 5);
+      // [images ([]), dates (str), curr nations (str)]
+      return [ExtractRandomElements(filteredImageURLs, filteredImageURLs.length < 5 ? 1 : 5), dates, currentNations, majorReligion];
     }
 
+    // generalInfo object includes differing fields that represent the date period.
+    const extractDates = (dataObj, periodName) => {
+
+      //* potential date fields: 
+      // yearStart/yearEnd, dates, lifeSpan
+      // lifeSpan should take precendence. Followed by yearStart/End and finally dates.
+      // yearStart/End + lifeSpan must include digits. 
+
+      console.log("extarcting...")
+      const containsDigits = /\d/;
+      
+      if(dataObj.lifeSpan && containsDigits.test(dataObj.lifeSpan)){
+        return dataObj.lifeSpan;
+      }
+      if(dataObj.yearStart && dataObj.yearEnd 
+        && containsDigits.test(dataObj.yearStart)
+        && containsDigits.test(dataObj.yearEnd)){
+        return dataObj.yearStart + ' - ' + dataObj.yearEnd;
+      }
+      if(dataObj.dates && containsDigits.test(dataObj.dates)){
+        return dataObj.dates;
+      }
+
+      // check specific periods and allocate manually.
+      switch (periodName) {
+        case "Chalcolithic period":
+          return "c. 6000 - 3300 BCE";
+        case "Early Dynastic period (Mesopotamia)":
+          return "c. 2900 – 2350 BCE"
+        case "Akkadian Empire":
+          return "c. 2334 – 2154 BCE"
+        case "Hurrians":
+          return "c. 1600 - c. 1000 BCE"
+        case "Bronze Age collapse":
+          return "c. 1200 - 1150 BCE"
+        case "Classical Antiquity to Late Antiquity":
+          return "c. 539 BCE - 700 CE"
+        default:
+          break;
+      }
+
+      return null
+
+    }
+
+    const onOpenDrawer= (title, content, subcontents = null, images = null)=>{
+      onOpen();
+      setDrawerContent({title: title, content: content, subContents: subcontents, images: images});
+    }
     useEffect(() => {
       //  if TL Data is empty, fetch from wiki api
-      if(sessionStorage.getItem("TLData") != null && sessionStorage.getItem("TLData") != "[]"){
+      if(sessionStorage.getItem("TLData") != null && sessionStorage.getItem("TLData") != "[]" && sessionStorage){
         // console.log('dsga ', sessionStorage.getItem('TLData') )
         const LSHist = JSON.parse(sessionStorage.getItem('TLData'));
         setHistData(LSHist);
@@ -173,14 +229,12 @@ const TimeLine =() => {
       }
     }, [])
 
-    const onOpenDrawer= (title, content, subcontents = null, images = null)=>{
-      onOpen();
-      setDrawerContent({title: title, content: content, subContents: subcontents, images: images});
-    }
+   
+
 
     return (
 
-      <VStack spacing={10} padding={3}>
+      <VStack spacing={10} >
 
        <Box pos='absolute' left="0px">
         <ColorModeSwitcher />
@@ -193,17 +247,15 @@ const TimeLine =() => {
           marginTop={10} 
           gridArea={'1/1/2/3'} 
           fontSize={{lg:'9xl', base:'6xl'}} 
-          marginLeft={3} 
+          paddingLeft={10}
           textTransform='uppercase'
         >Land Of Rivers
         </Heading>
-      <Divider/>
+      <Divider zIndex='-11'/>
     </VStack>
 
 
     {deviceType == 'mouseOnly' ? 
-
-  
 
        <VStack spacing={0} className='ImageDistortRoot' marginTop='100px !important' marginBottom='100px !important'>
         {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
@@ -254,7 +306,8 @@ const TimeLine =() => {
                             
                           }
                         }}
-                      />}
+                      />
+        }
         </VStack>
       
       : 
@@ -277,49 +330,77 @@ const TimeLine =() => {
       </SmoothScroll>
     }
 
-      <Divider width='50vw' />
+      <Divider width='50vw' zIndex='-11' />
 
       <Box padding={0}>
 
       {fetchingWikiData ? <Code fontSize='25px'>Building Timeline...</Code> :
 
-        <Timeline align={isLargerThan1280 ? 'alternate' : 'left'} className="myListRoot">
+        <Timeline align={isLargerThan1280 ? 'alternate' : 'left'} className="myListRoot" style={{padding:'0px'}}>
 
           {histData?.map((c,i) => {
               return(
 
                   <TimelineItem key={i} >
-                     <TimelineOppositeContent>
-                      <Text colorScheme='gray' fontSize={{ base:'10px', lg: "15px" }}>5000 B.C - 2000 B.C</Text>
+                     <TimelineOppositeContent style={{paddingLeft:!isLargerThan1280 && '0px'}}>
+                      <Table marginBottom='100px' >
+                        <Tbody fontSize={{ base:'10px', lg: "15px" }}>
+                          {c.dates && 
+                          <Tr>
+                            <Td fontWeight='semibold'>Period</Td>
+                            <Td>{c.dates}</Td>
+                          </Tr>
+                          }
+                          {c.nationsToday && 
+                            <Tr>
+                              <Td fontWeight='semibold'>Current Countries</Td>
+                              <Td>{c.nationsToday}</Td>
+                            </Tr>
+                            }
+                            {c.majorReligion && 
+                            <Tr>
+                              <Td fontWeight='semibold'>Major Religion</Td>
+                              <Td>{c.majorReligion}</Td>
+                            </Tr>
+                            }
+                        </Tbody>
+                    </Table>
+                      
                  </TimelineOppositeContent>
-                    <TimelineSeparator >
+                 <TimelineSeparator > 
                       <TimelineDot />
-                      <TimelineConnector />
-
-                    </TimelineSeparator>
-
+                      < TimelineConnector />
+                    </TimelineSeparator>  
                       <TimelineContent style={{marginBottom:'5vh'}}>
                         <Box
                           ref={boxClickRef} 
                           onClick={() => onOpenDrawer(c.title, c.content, c.items &&c.items, c.images && c.images)}
                           maxWidth='4xl' 
-                          width={!isLargerThan1280 && '50vw'}
+                          width={!isLargerThan1280 && '60vw'}
                           // padding='10px' 
-                          borderBottom='0.5px solid grey'
+                          // borderBottom='0.5px solid grey'
                           cursor='pointer'
                           align='center'
                             >
                           <Box overflow="hidden" >
-                          <Image  _hover={{transform: 'scale(1.05)'}}  transition='transform .9s' objectFit="contain" 
+                          <Image 
+                          className="tl-image"
+                           _hover={{transform: 'scale(1.05)'}} style={{pointerEvents:deviceType == 'touchOnly' && 'none'}} 
+                           transition='transform .9s' 
+                           objectFit="contain" 
                           src={c.images && c.images[c.images.length-1]}/>
                       
-                      </Box>  
-
-                          <Text 
-                           fontSize={{ base:'10px', lg: "22px" }}>{c.title}</Text>
+                      </Box> 
+                          <Heading 
+                          fontWeight='medium'
+                           fontSize={{ base:'15px', lg: "30px" }}>{c.title}</Heading>
                          
                         </Box>
-                        </TimelineContent>         
+                        <Divider />
+                        
+                        </TimelineContent>       
+                 
+
                 </TimelineItem>
                 )
               }
@@ -340,15 +421,18 @@ const TimeLine =() => {
           >
           <DrawerOverlay />
           <DrawerContent>
+              
             <DrawerCloseButton  />
-              <DrawerHeader>{drawerContent.title}</DrawerHeader>
+              <DrawerHeader >
+                <Heading fontSize={{ base:'30px', lg: "40px" }}>{drawerContent.title}</Heading>
+              </DrawerHeader>
               {console.log("object")}
               <DrawerBody marginBottom='-80px' paddingLeft={{ base: 5, lg: 20 }} paddingRight={{ base: 5, lg: 20 }}>
-                <Text marginBottom='30px'>{drawerContent.content}</Text>
+                <Text fontSize={{ base:'17px', lg: "22px" }} marginBottom='30px'>{drawerContent.content}</Text>
                 {drawerContent.subContents && drawerContent.subContents.map((c, i) => (
                   <Box key={i} marginBottom='10px'>
-                    <Text fontWeight='bold'>{c.title}</Text>
-                    <Text>{c.content}</Text>
+                    <Heading fontSize={{ base:'20px', lg: "30px" }} fontWeight='bold'>{c.title}</Heading>
+                    <Text fontSize={{ base:'17px', lg: "22px" }} marginTop='4px'>{c.content}</Text>
                     <Link to={{ pathname: '/gallery', state:{ title : c.title}}}>
                 <Button  size='sm' variant="outline"  mb={10} mt={5}>
                   Discover Artefacts</Button></Link>
@@ -364,16 +448,15 @@ const TimeLine =() => {
                     }
                 </Swiper>
               </DrawerBody>
-              
-          <Flex justify='center'>
+              <Flex justify='center'>
               <DrawerFooter >
 
 
               <Link to={{ pathname: '/gallery', state:{ title : drawerContent.title}}}>
-                <Button  size='lg' variant="outline"  mt={20}>
-                  Discover Artefacts from this period</Button></Link>
+                <Button fontSize={{ base:'15px', lg: "20px" }} size='lg' variant="outline" fontWeight='normal' mt={20}>
+                  Discover Museum Artefacts from this period</Button></Link>
               </DrawerFooter>
-          </Flex>
+              </Flex>
             </DrawerContent>
           </Drawer>}
       </VStack>

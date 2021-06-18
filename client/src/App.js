@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   ChakraProvider,
-  extendTheme ,
-  withDefaultColorScheme,
+  extendTheme,
 } from '@chakra-ui/react';
 import { mode } from '@chakra-ui/theme-tools';
 
@@ -20,6 +19,8 @@ import {
 } from "react-router-dom";
 
 import "@fontsource/cardo/400.css"
+import "@fontsource/open-sans/400.css"
+
 
 const breakpoints = createBreakpoints({
   xs: "350px",
@@ -31,13 +32,27 @@ const breakpoints = createBreakpoints({
 
 const fonts = {
   heading: "Cardo",
-  body: "Cardo",
+  body: "Open Sans",
 }
+const scrollbarConfig = {
+  '&::-webkit-scrollbar': {
+    width: '10px',
+  },
+  '&::-webkit-scrollbar-track': {
+    width: '10px',
+  }
+}
+
 const styles = {
   global: props => ({
     body: {
       color: mode('gray.800', 'whiteAlpha.900')(props),
       bg: mode('gray.200', '#141214')(props),
+      ...scrollbarConfig, 
+      '&::-webkit-scrollbar-thumb': {
+        background:  mode('gray.300', 'gray.700')(props),
+        borderRadius: '24px',
+      }
     },
   }),
 };
@@ -49,8 +64,23 @@ const components = {
       dialog: {
         bg: mode('white', '#1b1b1c')(props),
       },
+      body:{
+        ...scrollbarConfig, 
+        '&::-webkit-scrollbar-thumb': {
+          background:  mode('gray.200', 'gray.700')(props),
+          borderRadius: '24px',
+        }
+      }
+      
     }),
+    
   },
+  Divider:{
+    baseStyle: props => ({
+      borderColor: mode('gray.300', 'gray.700')(props),
+      marginTop: '5px',
+    }),
+  }
 };
 
 const theme = extendTheme({styles, components, breakpoints, fonts})
