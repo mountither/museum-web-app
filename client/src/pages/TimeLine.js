@@ -336,15 +336,15 @@ const TimeLine =() => {
 
       {fetchingWikiData ? <Code fontSize='25px'>Building Timeline...</Code> :
 
-        <Timeline align={isLargerThan1280 ? 'alternate' : 'left'} className="myListRoot" style={{padding:'0px'}}>
+        <Timeline align={isLargerThan1280 ? 'right' : 'right'} className="myListRoot" style={{padding:'0px'}}>
 
           {histData?.map((c,i) => {
               return(
 
                   <TimelineItem key={i} >
-                     <TimelineOppositeContent style={{paddingLeft:!isLargerThan1280 && '0px'}}>
-                      <Table marginBottom='100px' >
-                        <Tbody fontSize={{ base:'10px', lg: "15px" }}>
+                     <TimelineOppositeContent style={{paddingLeft:!isLargerThan1280 && '5px'}}>
+                      <Table marginBottom='100px' size={{base: 'sm', lg:'lg'}}>
+                        <Tbody fontSize={{ base:'5px', lg: "18px", md:"10px" }}>
                           {c.dates && 
                           <Tr>
                             <Td fontWeight='semibold'>Period</Td>
@@ -353,13 +353,13 @@ const TimeLine =() => {
                           }
                           {c.nationsToday && 
                             <Tr>
-                              <Td fontWeight='semibold'>Current Countries</Td>
+                              <Td fontWeight='semibold'>Today</Td>
                               <Td>{c.nationsToday}</Td>
                             </Tr>
                             }
                             {c.majorReligion && 
                             <Tr>
-                              <Td fontWeight='semibold'>Major Religion</Td>
+                              <Td fontWeight='semibold'>Religion</Td>
                               <Td>{c.majorReligion}</Td>
                             </Tr>
                             }
@@ -412,7 +412,7 @@ const TimeLine =() => {
 
      {isOpen && <Drawer
           isOpen={isOpen}
-          placement="left"
+          placement="right"
           onClose={onClose}
           finalFocusRef={boxClickRef}
           size='xl'
