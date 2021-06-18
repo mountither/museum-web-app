@@ -67,34 +67,35 @@ const Gallery = ()=> {
       
       const [METRes, METError] = await getMETResponse(params);
 
-      // !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
-      if(!METError){
-        setMETArtData(METRes);
-        sessionStorage.setItem('METData', JSON.stringify(METRes));
+      !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
+      // if(!METError){
+      //   setMETArtData(METRes);
+      //   sessionStorage.setItem('METData', JSON.stringify(METRes));
 
-      }
-      else{
-        tempErrorArr.push(METError);
-      }
+      // }
+      // else{
+      //   tempErrorArr.push(METError);
+      // }
       
-      // const [VAMRes, VAMError] = await getVAMResponse(params);
+      const [VAMRes, VAMError] = await getVAMResponse(params);
 
-      // !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
-      // const [HAMRes, HAMError] = await getHAMResponse(params);
+      !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
 
-      // !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
+      const [HAMRes, HAMError] = await getHAMResponse(params);
+
+      !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
 
       // const [SMGRes, SMGError] = await getSMGResponse(params);
 
       // !SMGError ? setSMGArtData(SMGRes.data.data) : tempErrorArr.push(SMGError);
 
-      // const [MVCRes, MVCError] = await getMVCResponse(params);
+      const [MVCRes, MVCError] = await getMVCResponse(params);
 
-      // !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
+      !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
 
-      // const [AICRes, AICError] = await getAICResponse(params);
+      const [AICRes, AICError] = await getAICResponse(params);
       // console.log(AICRes);
-      // !AICError ? setAICArtData(AICRes) : tempErrorArr.push(AICError);
+      !AICError ? setAICArtData(AICRes) : tempErrorArr.push(AICError);
 
       //const resSMITH = await axios.get(`https://www.brooklynmuseum.org/api/v2/tags/Mesopotamia`);
       
@@ -261,15 +262,15 @@ const Gallery = ()=> {
   useEffect(() =>{
     window.scrollTo(0,0);
 
-    if(sessionStorage.getItem("METData") != null && sessionStorage.getItem("METData") != "[]"){
-      const METData = JSON.parse(sessionStorage.getItem('METData'));
-      setMETArtData(METData);
-      setLoading(false);
-    }
-    else{
+    // if(sessionStorage.getItem("METData") != null && sessionStorage.getItem("METData") != "[]"){
+    //   const METData = JSON.parse(sessionStorage.getItem('METData'));
+    //   setMETArtData(METData);
+    //   setLoading(false);
+    // }
+    // else{
       fetchMuseumObjects();
 
-    }
+    // }
     
 
   }, [])
