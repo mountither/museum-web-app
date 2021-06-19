@@ -51,8 +51,8 @@ const Gallery = ()=> {
   //   setPageTitle(location.state.title)
   // },[location])
 
-  const fetchMuseumObjects = async () =>{
-   
+  const fetchMuseumObjects = async (source) =>{
+ 
     // testing potentail parameters
       //const params = {query:'Achaemenid', start: -600, end: -330};
       const params = {query: location.state && location.state.title, start: -7000, end: -1000};
@@ -65,7 +65,7 @@ const Gallery = ()=> {
 
       const tempErrorArr = [];
       
-      const [METRes, METError] = await getMETResponse(params);
+      const [METRes, METError] = await getMETResponse(params, source);
 
       !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
       // if(!METError){
@@ -77,25 +77,25 @@ const Gallery = ()=> {
       //   tempErrorArr.push(METError);
       // }
       
-      const [VAMRes, VAMError] = await getVAMResponse(params);
+      // const [VAMRes, VAMError] = await getVAMResponse(params, source);
 
-      !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
+      // !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
 
-      const [HAMRes, HAMError] = await getHAMResponse(params);
+      // const [HAMRes, HAMError] = await getHAMResponse(params, source);
 
-      !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
+      // !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
 
       // const [SMGRes, SMGError] = await getSMGResponse(params);
 
       // !SMGError ? setSMGArtData(SMGRes.data.data) : tempErrorArr.push(SMGError);
 
-      const [MVCRes, MVCError] = await getMVCResponse(params);
+      // const [MVCRes, MVCError] = await getMVCResponse(params, source);
 
-      !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
+      // !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
 
-      const [AICRes, AICError] = await getAICResponse(params);
-      // console.log(AICRes);
-      !AICError ? setAICArtData(AICRes) : tempErrorArr.push(AICError);
+      // const [AICRes, AICError] = await getAICResponse(params, source);
+      // // console.log(AICRes);
+      // !AICError ? setAICArtData(AICRes) : tempErrorArr.push(AICError);
 
       //const resSMITH = await axios.get(`https://www.brooklynmuseum.org/api/v2/tags/Mesopotamia`);
       
@@ -104,26 +104,39 @@ const Gallery = ()=> {
       setErrors(tempErrorArr);
 
       setLoading(false);
-
   
   }
   // Metropolitan Museum
-  const getMETResponse = async(params)=>{
+  const getMETResponse = async(params, source)=>{
     try
     {
       // fecth from metro museum
       //const resMET = await axios.get("https://collectionapi.metmuseum.org/public/collection/v1/search?geoLocation=Iraq&q=fgfhdood&hasImage=true");
-      const objectResponse = await axios.get(`https://collectionapi.metmuseum.org/public/collection/v1/search?q=${params.query}&hasImage=true`);
+      const url = `https://collectionapi.metmuseum.org/public/collection/v1/search?q=${params.query}&hasImage=true&limit=5`;
+      const objectResponse = await axios.get(url, {
+        cancelToken: source.token
+      });
       
-      const response = [];
       const resMETCount = objectResponse.data.total > 10 ? 10 : objectResponse.data.total;
 
-      for(let i=0; i < resMETCount; i++){
-        const resEach = await axios.get(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectResponse.data.objectIDs[i]}`);
+      const response = [];
+
+      await Promise.all(
+        objectResponse.data.objectIDs.slice(0, resMETCount).map( async (t, i) => {
+        const itemUrl = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${t}`
+        const resEach = await axios.get(itemUrl, {
+          cancelToken: source.token
+        });
+
         if(resEach.data.objectBeginDate >= params.start && resEach.data.objectEndDate <= params.end){
-          response.push(resEach.data);
+          response.push(resEach.data)
         }
-      }
+
+        }));
+
+      console.log(response);
+
+
       console.log("Count in MET: (10 shown) ", objectResponse.data.total);
 
       //data, error
@@ -131,18 +144,26 @@ const Gallery = ()=> {
     }
     catch(error)
     {
-      console.log(error);
-      return [null, 'Metro Museum'];
+      if(axios.isCancel(error)){
+        return [null, 'Fetch Canceled'];
+      }
+      else{
+        console.log(error);
+        return [null, 'Metro Museum'];
+      }
     }
       
   }
   // victoria and albert museum 
-  const getVAMResponse = async(params)=>{
+  const getVAMResponse = async(params, source)=>{
 
     try{
 
-      // fetch from victoria and albert museum 
-      const response = await axios.get(`https://api.vam.ac.uk/v2/objects/search?q=${params.query}&images_exist=true&year_made_from=${params.start}&year_made_to=${params.end}`);
+      // fetch from victoria and albert museum
+      const url = `https://api.vam.ac.uk/v2/objects/search?q=${params.query}&images_exist=true&year_made_from=${params.start}&year_made_to=${params.end}`
+      const response = await axios.get(url, {
+        cancelToken: source.token
+      });
       
       console.log("Count in VAM:  ", response.data.info.record_count);
 
@@ -156,12 +177,15 @@ const Gallery = ()=> {
   }
 
   // harvard art museums
-  const getHAMResponse = async(params)=>{
+  const getHAMResponse = async(params, source)=>{
 
     try{
 
       // fetch from harvard arts museum
-      const response = await axios.get(`https://api.harvardartmuseums.org/object?q=${params.query}&hasimage=1&sort=random&apikey=${process.env.REACT_APP_HAM_API_KEY}`);
+      const url = `https://api.harvardartmuseums.org/object?q=${params.query}&hasimage=1&sort=random&apikey=${process.env.REACT_APP_HAM_API_KEY}`
+      const response = await axios.get(url, {
+        cancelToken: source.token
+      });
       console.log("Count in HAM: (10 shown) ", response.data.info.totalrecords);
       return [response, null];
 
@@ -175,7 +199,7 @@ const Gallery = ()=> {
   }
 
   // science museum group
-  const getSMGResponse = async(params)=>{
+  const getSMGResponse = async(params, source)=>{
     try
     { 
       const headers = {
@@ -204,14 +228,16 @@ const Gallery = ()=> {
   }
 
   // museum victoria collection
-  const getMVCResponse = async(params)=>{
+  const getMVCResponse = async(params, source)=>{
     try
     { 
       const limit = 20;
 
       const url = `https://collections.museumsvictoria.com.au/api/search?query=${params.query}&hasimages=yes&perpage=${limit}&locality=iraq`;
 
-      const response = await axios.get(url);
+      const response = await axios.get(url, {
+        cancelToken: source.token
+      });
 
       console.log(response);
       console.log("Count in MVC: ", response.data.length);
@@ -230,12 +256,14 @@ const Gallery = ()=> {
   }
   
   // Art Institute of Chicago 
-  const getAICResponse = async(params)=>{
+  const getAICResponse = async(params, source)=>{
     try
     { 
       const url = `https://api.artic.edu/api/v1/artworks/search?q=${params.query}`;
 
-      const shallowRes = await axios.get(url);
+      const shallowRes = await axios.get(url, {
+        cancelToken: source.token
+      });
       const response = [];
       for(let i=0; i < shallowRes.data.data.length; i++){
         const resEach = await axios.get(`https://api.artic.edu/api/v1/artworks/${shallowRes.data.data[i].id}`);
@@ -262,16 +290,23 @@ const Gallery = ()=> {
   useEffect(() =>{
     window.scrollTo(0,0);
 
+    let source = axios.CancelToken.source();
+
     // if(sessionStorage.getItem("METData") != null && sessionStorage.getItem("METData") != "[]"){
     //   const METData = JSON.parse(sessionStorage.getItem('METData'));
     //   setMETArtData(METData);
     //   setLoading(false);
     // }
     // else{
-      fetchMuseumObjects();
+
+
+      fetchMuseumObjects(source);
 
     // }
-    
+    return () => {
+      console.log("Fetch Cancel: unmounting");
+      source.cancel();
+    }
 
   }, [])
 
@@ -316,9 +351,11 @@ const Gallery = ()=> {
                   title={a.title} 
                   imgURL={a.primaryImageSmall}
                   dateCreation={a.objectDate}
-                  region={a.subregion} 
+                  region={a.region} 
                   restPayload={[
-                    a.culture && {type: 'Culture', data:a.culture}
+                    a.culture && {type: 'Culture', data:a.culture},
+                    a.medium && {type: 'Type', data:a.medium},
+                    a.period && {type: 'Period', data:a.period}
                   ]}
                 />
 
