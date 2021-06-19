@@ -35,7 +35,7 @@ const AlertContent = ({errors}) =>{
                 <UnorderedList>
                {errors.map((msg, i) => {
                   return(
-                      <ListItem fontSize={{base: 13, lg:13, md:13, sm:10, xs:10}}>{msg}</ListItem>
+                      <ListItem key={i} fontSize={{base: 13, lg:13, md:13, sm:10, xs:10}}>{msg}</ListItem>
                       )
                       // <AlertDescription fontSize={{base: 15, lg:15, md:15, sm:10, xs:10}}>{msg}</AlertDescription>
                     }
