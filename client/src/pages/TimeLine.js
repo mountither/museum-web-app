@@ -344,23 +344,23 @@ const TimeLine =() => {
                   <TimelineItem key={i} >
                      <TimelineOppositeContent style={{paddingLeft:!isLargerThan1280 && '5px'}}>
                       <Table marginBottom='100px' size={{base: 'sm', lg:'lg'}}>
-                        <Tbody fontSize={{ base:'5px', lg: "18px", md:"10px" }}>
+                        <Tbody fontSize={{ base:'8px', lg: "18px", md:"12px" }}>
                           {c.dates && 
                           <Tr>
-                            <Td fontWeight='semibold'>Period</Td>
+                            <Td padding='5px' fontWeight='semibold'>Period</Td>
                             <Td>{c.dates}</Td>
                           </Tr>
                           }
                           {c.nationsToday && 
                             <Tr>
-                              <Td fontWeight='semibold'>Today</Td>
+                              <Td padding='5px' fontWeight='semibold'>Today</Td>
                               <Td>{c.nationsToday}</Td>
                             </Tr>
                             }
                             {c.majorReligion && 
-                            <Tr>
-                              <Td fontWeight='semibold'>Religion</Td>
-                              <Td>{c.majorReligion}</Td>
+                            <Tr >
+                              <Td padding='5px' fontWeight='semibold'>Religion</Td>
+                              <Td >{c.majorReligion}</Td>
                             </Tr>
                             }
                         </Tbody>
@@ -376,7 +376,7 @@ const TimeLine =() => {
                           ref={boxClickRef} 
                           onClick={() => onOpenDrawer(c.title, c.content, c.items &&c.items, c.images && c.images)}
                           maxWidth='4xl' 
-                          width={!isLargerThan1280 && '60vw'}
+                          width={!isLargerThan1280 && '40vw'}
                           // padding='10px' 
                           // borderBottom='0.5px solid grey'
                           cursor='pointer'
