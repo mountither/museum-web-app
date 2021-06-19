@@ -256,7 +256,7 @@ const TimeLine =() => {
 
 
     {deviceType == 'mouseOnly' ? 
-
+      <>
        <VStack spacing={0} className='ImageDistortRoot' marginTop='100px !important' marginBottom='100px !important'>
         {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
         
@@ -309,11 +309,13 @@ const TimeLine =() => {
                       />
         }
         </VStack>
+      </>
       
       : 
+      <>
       <SmoothScroll>
 
-      <VStack spacing='30px' zIndex='-10'  opacity='0.4' >
+      <VStack width='75vw'  marginTop='50px' spacing='40px' zIndex='-10'  >
         {/* <img style={{zIndex:'-20'}} src={"https://upload.wikimedia.org/wikipedia/en/b/b8/NC_Mesopotamia_sites.jpg"}/> */}
         <Box >
         {/* Country of the noble lords */}
@@ -328,9 +330,15 @@ const TimeLine =() => {
         </Box>
         </VStack>
       </SmoothScroll>
+      <VStack pos='absolute' zIndex='-20' opacity='0.7' top='75vh'>
+      <Text fontSize="80px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
+      <Text fontSize="80px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
+      <Text fontSize="80px" _hover={{color:'white'}} style={{MozUserSelect: 'none', userSelect:'none', WebkitUserSelect:'none'}} >𒆠𒂗𒄀</Text>
+    </VStack>
+    </>
     }
 
-      <Divider width='50vw' zIndex='-11' />
+<Divider width='50vw' zIndex='-11' />
 
       <Box padding={0}>
 

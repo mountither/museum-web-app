@@ -19,14 +19,14 @@ const SmoothScroll = props => {
   const initAnimationLoop = () => {
     const renderDefault = () => {
       prevScrollOffset = lerp(prevScrollOffset, scrollOffset, ease);
-      prevScrollOffset = Math.round(prevScrollOffset);
+      prevScrollOffset = Math.round(prevScrollOffset-10);
 
       if (prevScrollOffset < 0.1) {
         prevScrollOffset = 0;
       }
 
       const diff = Math.round(scrollOffset - prevScrollOffset);
-      const speed = diff * 0.01;
+      const speed = diff * 0.02;
 
       if (contentEl) {
         contentEl.style.transform = `translate3d(0, -${prevScrollOffset}px, 0) skewY(${speed}deg)`;
