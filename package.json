@@ -38,7 +38,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "semantic-release": "semantic-release --branches main"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -57,5 +58,12 @@
   },
   "devDependencies": {
     "semantic-release": "^17.4.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mountither/museum-web-app.git"
+  },
+  "publishConfig": {
+    "access": "restricted"
   }
 }
