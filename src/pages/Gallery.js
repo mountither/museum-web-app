@@ -120,22 +120,20 @@ const Gallery = ()=> {
       const resMETCount = objectResponse.data.total > 10 ? 10 : objectResponse.data.total;
 
       const response = [];
-
-      await Promise.all(
-        objectResponse.data.objectIDs.slice(0, resMETCount).map( async (t, i) => {
-        const itemUrl = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${t}`
-        const resEach = await axios.get(itemUrl, {
-          cancelToken: source.token
-        });
-
-        if(resEach.data.objectBeginDate >= params.start && resEach.data.objectEndDate <= params.end){
-          response.push(resEach.data)
-        }
-
-        }));
-
-      console.log(response);
-
+      if(objectResponse.data.total > 0){
+        await Promise.all(
+          objectResponse.data?.objectIDs?.slice(0, resMETCount).map( async (t, i) => {
+          const itemUrl = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${t}`
+          const resEach = await axios.get(itemUrl, {
+            cancelToken: source.token
+          });
+  
+          if(resEach.data.objectBeginDate >= params.start && resEach.data.objectEndDate <= params.end){
+            response.push(resEach.data)
+          }
+  
+          }));
+      }
 
       console.log("Count in MET: (10 shown) ", objectResponse.data.total);
 
