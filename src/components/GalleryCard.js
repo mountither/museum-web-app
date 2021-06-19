@@ -55,27 +55,27 @@ const GalleryCard = ({title, imgURL, dateCreation, region,  restPayload}) =>{
 
             <Table>
               <Tbody fontSize={{ base:'10px', lg: "15px" }}>
-               {dateCreation && 
+               {dateCreation ? 
                 <Tr>
                     <Td fontWeight='semibold'>Date Created</Td>
                     <Td>{dateCreation}</Td>
-                  </Tr>
+                  </Tr> : null
                 }
                 {
-                region && 
+                region ?
                 <Tr>
                   <Td fontWeight='semibold'>Region</Td>
                   <Td>{region}</Td>
-                </Tr>
+                </Tr> : null
                 }
                 {
                   restPayload && 
                     restPayload.map((o, i) => (
-                    o && 
+                    o?.data ? 
                     <Tr key={i}>
                       <Td fontWeight='semibold'>{o.type}</Td>
                       <Td>{o.data}</Td>
-                    </Tr>
+                    </Tr> : null
                     ))
               }
               </Tbody>
