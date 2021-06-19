@@ -342,7 +342,7 @@ const TimeLine =() => {
 
       <Box padding={0}>
 
-      {fetchingWikiData ? <Code fontSize='28px'>Building Timeline...</Code> :
+      {fetchingWikiData ? <Code fontSize='15px'>Building Timeline...</Code> :
 
         <Timeline align={isLargerThan1280 ? 'right' : 'right'} className="myListRoot" style={{padding:'0px'}}>
 
