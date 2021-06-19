@@ -1,6 +1,6 @@
 {
   "name": "mwa",
-  "version": "0.1.0",
+  "version": "0.0.0-development",
   "private": true,
   "dependencies": {
     "@chakra-ui/icons": "^1.0.13",
@@ -55,5 +55,7 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "semantic-release": "^17.4.4"
+  }
 }

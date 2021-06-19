@@ -9,8 +9,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    env: 
-      CI: false
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-node@v1
@@ -21,5 +19,6 @@ jobs:
       - run: npm test
       - run: npx semantic-release
         env:
+          CI: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
