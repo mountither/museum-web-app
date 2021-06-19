@@ -39,7 +39,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "semantic-release": "semantic-release --branches main"
+    "semantic-release": "semantic-release --branches main",
+    "commit": "cz"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -57,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "cz-conventional-changelog": "^3.3.0",
     "semantic-release": "^17.4.4"
   },
   "repository": {
@@ -65,5 +67,10 @@
   },
   "publishConfig": {
     "access": "restricted"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
