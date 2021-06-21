@@ -7,7 +7,7 @@ import {
   Divider,
   useColorMode,
   Heading,
-  
+  Button
 } from '@chakra-ui/react';
 import { ColorModeSwitcher } from '../components/ColorModeSwitcher';
 
@@ -24,6 +24,7 @@ import {
 
 import AlertContent from '../components/AlertContent';
 import GalleryCard from '../components/GalleryCard';
+import {HAMApiCenturyFromYear} from '../utils/DateHelpers';
 
 // TODO - Implement a Load more feature (pagination)
 
@@ -45,67 +46,56 @@ const Gallery = ()=> {
   // used for the alert box.
 
   const location = useLocation();
-
+  const history = useHistory();
   // useEffect(()=>{
   //   console.log(location);
   //   setPageTitle(location.state.title)
   // },[location])
 
   const fetchMuseumObjects = async (source) =>{
- 
+      const time1 = Date.now();
+      //* location state holds the query title and years. 
+
     // testing potentail parameters
       //const params = {query:'Achaemenid', start: -600, end: -330};
-      const params = {query: location.state && location.state.title, start: -7000, end: -1000};
       //const params = {query: 'Mesopotamia', start: -1, end: 1000};
-      //const params = {query: 'Iraq', start: -331, end: -140};
-     // const params = {query:'Iraq', start: -5000, end: 1400};
-
+    console.log(location.state.startPeriod , location.state.endPeriod );
+      const params = {query: location.state.title, start: location.state.startPeriod || '-5000', end: location.state.endPeriod || '1950'};
 
       setLoading(true);
 
-      const tempErrorArr = [];
+      const errorSet = [];
       
       const [METRes, METError] = await getMETResponse(params, source);
+      !METError ? setMETArtData(METRes) : errorSet.push(METError);
+     
+      const [VAMRes, VAMError] = await getVAMResponse(params, source);
+      !VAMError ? setVAMArtData(VAMRes.data.records) : errorSet.push(VAMError);
 
-      !METError ? setMETArtData(METRes) : tempErrorArr.push(METError);
-      // if(!METError){
-      //   setMETArtData(METRes);
-      //   sessionStorage.setItem('METData', JSON.stringify(METRes));
+      const [HAMRes, HAMError] = await getHAMResponse(params, source);
+      !HAMError ? setHAMArtData(HAMRes) : errorSet.push(HAMError);
 
-      // }
-      // else{
-      //   tempErrorArr.push(METError);
-      // }
-      
-      // const [VAMRes, VAMError] = await getVAMResponse(params, source);
-
-      // !VAMError ? setVAMArtData(VAMRes.data.records) : tempErrorArr.push(VAMError);
-
-      // const [HAMRes, HAMError] = await getHAMResponse(params, source);
-
-      // !HAMError ? setHAMArtData(HAMRes.data.records) : tempErrorArr.push(HAMError);
-
-      // const [SMGRes, SMGError] = await getSMGResponse(params);
-
-      // !SMGError ? setSMGArtData(SMGRes.data.data) : tempErrorArr.push(SMGError);
+      // not used
+      // const [SMGRes, SMGError] = await getSMGResponse(params, source);
+      // !SMGError ? setSMGArtData(SMGRes.data.data) : errorSet.push(SMGError);
 
       // const [MVCRes, MVCError] = await getMVCResponse(params, source);
-
-      // !MVCError ? setMVCArtData(MVCRes.data) : tempErrorArr.push(MVCError);
+      // !MVCError ? setMVCArtData(MVCRes.data) : errorSet.push(MVCError);
 
       // const [AICRes, AICError] = await getAICResponse(params, source);
-      // // console.log(AICRes);
-      // !AICError ? setAICArtData(AICRes) : tempErrorArr.push(AICError);
+      // !AICError ? setAICArtData(AICRes) : errorSet.push(AICError);
 
       //const resSMITH = await axios.get(`https://www.brooklynmuseum.org/api/v2/tags/Mesopotamia`);
       
       // console.log(resSMITH.data.response.rows);
 
-      setErrors(tempErrorArr);
-
+      setErrors(errorSet);
+      console.log(errorSet);
       setLoading(false);
-  
+      const time2 = Date.now();
+      console.log(time2-time1);
   }
+
   // Metropolitan Museum
   const getMETResponse = async(params, source)=>{
     try
@@ -128,7 +118,7 @@ const Gallery = ()=> {
             cancelToken: source.token
           });
   
-          if(resEach.data.objectBeginDate >= params.start && resEach.data.objectEndDate <= params.end){
+          if(resEach.data.objectBeginDate >= params.start && resEach.data.objectBeginDate <= params.end){
             response.push(resEach.data)
           }
   
@@ -143,7 +133,7 @@ const Gallery = ()=> {
     catch(error)
     {
       if(axios.isCancel(error)){
-        return [null, 'Fetch Canceled'];
+        return [null, 'Fetch Canceled @ MET'];
       }
       else{
         console.log(error);
@@ -158,19 +148,22 @@ const Gallery = ()=> {
     try{
 
       // fetch from victoria and albert museum
-      const url = `https://api.vam.ac.uk/v2/objects/search?q=${params.query}&images_exist=true&year_made_from=${params.start}&year_made_to=${params.end}`
+      // const url = `https://api.vam.ac.uk/v2/objects/search?q=${params.query}&images_exist=true&year_made_from=${params.start}&year_made_to=${params.end}`
+      const url = `https://api.vam.ac.uk/v2/objects/search?q_place_name=mesopotamia|iraq|turkey|iran|syria&year_made_from=${params.start}&year_made_to=${params.end}&images_exist=1&random=1`
       const response = await axios.get(url, {
         cancelToken: source.token
       });
       
       console.log("Count in VAM:  ", response.data.info.record_count);
-
       return [response, null];
     }
     catch(error){
-      console.log(error);
-
-      return [null, 'Victoria and Albert Museum']
+      if(axios.isCancel(error)){
+        return [null, 'Fetch Canceled @ VAM'];
+      }
+      else{
+        return [null, 'Victoria and Albert Museum']
+      }
     }
   }
 
@@ -180,50 +173,62 @@ const Gallery = ()=> {
     try{
 
       // fetch from harvard arts museum
-      const url = `https://api.harvardartmuseums.org/object?q=${params.query}&hasimage=1&sort=random&apikey=${process.env.REACT_APP_HAM_API_KEY}`
+      const limit = 10;
+      const page= '1';
+
+      // all Middle east
+      const placeID = 2028350;
+      const centuries = HAMApiCenturyFromYear(params.start, params.end).join('|');
+      console.log(centuries);
+      const url = `https://api.harvardartmuseums.org/object?q=*&hasimage=1&size=${limit}&place=${placeID}&century=${centuries}&apikey=${process.env.REACT_APP_HAM_API_KEY}`
       const response = await axios.get(url, {
         cancelToken: source.token
       });
-      console.log("Count in HAM: (10 shown) ", response.data.info.totalrecords);
-      return [response, null];
 
+      console.log("Count in HAM: (10 shown) ", response.data.info.totalrecords);
+      
+      return [response.data.records, null];
     }
     catch(error){
-
-      console.log(error);
-      
-      return [null, 'Havard Arts Museum']
-    }
-  }
-
-  // science museum group
-  const getSMGResponse = async(params, source)=>{
-    try
-    { 
-      const headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+      if(axios.isCancel(error)){
+        return [null, 'Fetch Canceled @ HAM'];
       }
-      
-      const url = `https://collection.sciencemuseumgroup.org.uk/search/images?q=${params.query}`;
-
-      const response = await axios.get(url, {headers});
-
-      console.log(response.data.data);
-      console.log("Count in SMG: ", response.data.meta.count.type.all);
-
-      // response.data.data.map((item) => console.log(item.attributes?.lifecycle?.creation[0].date));
-
-      return [response, null]
-    }
-    catch(error)
-    {
-      console.log(error);
-
-      return [null, 'Science Museum Group']
-
+      else{
+        return [null, 'Havard Arts Museum']
+      }
     }
   }
+
+  // science museum group (inactive)
+  // const getSMGResponse = async(params, source)=>{
+  //   try
+  //   { 
+  //     const headers = {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     }
+      
+  //     const url = `https://collection.sciencemuseumgroup.org.uk/search/images/places/mesopotamia?q=${params.query}&random=10`;
+
+  //     const response = await axios.get(url, {headers, cancelToken: source.token});
+
+  //     console.log(response);
+  //     console.log("Count in SMG: ", response.data.meta.count.type.all);
+
+  //     // response.data.data.map((item) => console.log(item.attributes?.lifecycle?.creation[0].date));
+
+  //     return [response, null]
+  //   }
+  //   catch(error)
+  //   {
+  //     if(axios.isCancel(error)){
+  //       return [null, 'Fetch Canceled @ SMG'];
+  //     }
+  //     else{
+  //       return [null, 'Science Museum Group']
+  //     }
+  //   }
+  // }
 
   // museum victoria collection
   const getMVCResponse = async(params, source)=>{
@@ -246,10 +251,12 @@ const Gallery = ()=> {
     }
     catch(error)
     {
-      console.log(error);
-
-      return [null, 'Museum Victoria']
-
+      if(axios.isCancel(error)){
+        return [null, 'Fetch Canceled @ MVC'];
+      }
+      else{
+        return [null, 'Museum Victoria']
+      }
     }
   }
   
@@ -278,17 +285,19 @@ const Gallery = ()=> {
     }
     catch(error)
     {
-      console.log(error);
-
-      return [null, 'Art Institute of Chicago']
-
+      if(axios.isCancel(error)){
+        return [null, 'Fetch Canceled @ AIC'];
+      }
+      else{
+        return [null, 'Art Institute of Chicago']
+      }
     }
   }
 
   useEffect(() =>{
-    window.scrollTo(0,0);
 
     let source = axios.CancelToken.source();
+    window.scrollTo(0,0);
 
     // if(sessionStorage.getItem("METData") != null && sessionStorage.getItem("METData") != "[]"){
     //   const METData = JSON.parse(sessionStorage.getItem('METData'));
@@ -296,17 +305,16 @@ const Gallery = ()=> {
     //   setLoading(false);
     // }
     // else{
-
-
-      fetchMuseumObjects(source);
-
+    fetchMuseumObjects(source);
     // }
     return () => {
-      console.log("Fetch Cancel: unmounting");
+      console.log("cleanup @ gallery");
+      setLoading(false);
       source.cancel();
     }
 
   }, [])
+
 
   return (
     <>
@@ -319,7 +327,14 @@ const Gallery = ()=> {
       <Box pos='absolute' left="0px">
         <ColorModeSwitcher />
       </Box>
-         <Link to='/' ><Text fontWeight='semibold' fontSize='15px' _hover={{textDecoration: 'underline'}} textUnderlineOffset='2px'>Home</Text></Link>
+
+           <Button fontWeight='semibold' fontSize='15px'
+           variant='link'
+           onClick={()=> history.goBack()}
+            >
+             Back
+             </Button>
+
           <Grid
                 templateRows="1fr 0.2fr"
                 templateColumns="1fr 1fr"
@@ -334,10 +349,9 @@ const Gallery = ()=> {
               marginLeft={3} 
               fontWeight="hairline" 
               textTransform='capitalize'
-               >{location.state.title}<Divider/></Heading>
+               >{location.state.title || 'Untitled'}<Divider/></Heading>
 
-                <AlertContent errors={errors} />   
-  
+                <AlertContent errors={errors}  zIndex={10} gridArea={'2/2/3/3'}/>   
           </Grid>
 
           {
