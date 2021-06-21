@@ -10,17 +10,17 @@ import {
     Box
 } from '@chakra-ui/react';
 
-const AlertContent = ({errors}) =>{
+const AlertContent = ({errors, ...boxProps}) =>{
 
     const { isOpen, onToggle} = useDisclosure()
 
 
     return (
 
-        <Box zIndex={10} gridArea={'2/2/3/3'} width={{lg:375, md: 375, base:310}} height={30} marginTop={5}  >
+        <Box {...boxProps} width={{lg:375, md: 375, base:310}} height={30} marginTop={5}  >
 
         {
-          errors.length > 0 && 
+          errors.length > 0  && 
        
             <Alert 
               borderRadius={5}
