@@ -53,13 +53,11 @@ const Gallery = ()=> {
   // },[location])
 
   const fetchMuseumObjects = async (source) =>{
-      const time1 = Date.now();
       //* location state holds the query title and years. 
 
     // testing potentail parameters
       //const params = {query:'Achaemenid', start: -600, end: -330};
       //const params = {query: 'Mesopotamia', start: -1, end: 1000};
-    console.log(location.state.startPeriod , location.state.endPeriod );
       const params = {query: location.state.title, start: location.state.startPeriod || '-5000', end: location.state.endPeriod || '1950'};
 
       setLoading(true);
@@ -90,10 +88,7 @@ const Gallery = ()=> {
       // console.log(resSMITH.data.response.rows);
 
       setErrors(errorSet);
-      console.log(errorSet);
       setLoading(false);
-      const time2 = Date.now();
-      console.log(time2-time1);
   }
 
   // Metropolitan Museum
@@ -136,7 +131,6 @@ const Gallery = ()=> {
         return [null, 'Fetch Canceled @ MET'];
       }
       else{
-        console.log(error);
         return [null, 'Metro Museum'];
       }
     }
@@ -179,7 +173,6 @@ const Gallery = ()=> {
       // all Middle east
       const placeID = 2028350;
       const centuries = HAMApiCenturyFromYear(params.start, params.end).join('|');
-      console.log(centuries);
       const url = `https://api.harvardartmuseums.org/object?q=*&hasimage=1&size=${limit}&place=${placeID}&century=${centuries}&apikey=${process.env.REACT_APP_HAM_API_KEY}`
       const response = await axios.get(url, {
         cancelToken: source.token
@@ -242,7 +235,6 @@ const Gallery = ()=> {
         cancelToken: source.token
       });
 
-      console.log(response);
       console.log("Count in MVC: ", response.data.length);
 
       // response.data.data.map((item) => console.log(item.attributes?.lifecycle?.creation[0].date));
@@ -308,7 +300,6 @@ const Gallery = ()=> {
     fetchMuseumObjects(source);
     // }
     return () => {
-      console.log("cleanup @ gallery");
       setLoading(false);
       source.cancel();
     }

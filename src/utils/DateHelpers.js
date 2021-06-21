@@ -23,8 +23,6 @@ export const HAMApiCenturyFromYear = (yearStart, yearEnd) => {
         centuries.push(`${Math.abs(i)}${nth(Math.abs(i))} century${centuryType(i)}`);
        
     }
-    console.log(centuries.join("|"));
-    
     return centuries;
 }
 

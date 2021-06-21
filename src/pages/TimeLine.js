@@ -480,7 +480,6 @@ const TimeLine =() => {
               <DrawerHeader >
                 <Heading fontSize={{ base:'30px', lg: "40px" }}>{drawerData.title}</Heading>
               </DrawerHeader>
-              {console.log("object")}
               <DrawerBody marginBottom='-80px' paddingLeft={{ base: 5, lg: 20 }} paddingRight={{ base: 5, lg: 20 }}>
                 <Text fontSize={{ base:'17px', lg: "22px" }} marginBottom='30px'>{drawerData.content}</Text>
                 {drawerData.subContents && drawerData.subContents.map((c, i) => (
