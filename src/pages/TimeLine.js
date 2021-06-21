@@ -69,78 +69,23 @@ SwiperCore.use([Pagination]);
 // TODO - either character with image distort bg or map with major cities with image distort of relevant pieces.
 const TimeLine =() => {
 
-    const images =[
-      "https://upload.wikimedia.org/wikipedia/commons/c/c2/Gebel_el-Arak_Knife_ivory_handle_%28front_top_part_detail%29.jpg",
-      "https://upload.wikimedia.org/wikipedia/commons/b/b7/Mesopotamia%2C_Periodo_proto-dinastico%2C_placca_con_scena_di_banchetto%2C_da_khafajah%2C_2650-2550_ac_ca.jpg",
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Anubanini_extracted.jpg/1024px-Anubanini_extracted.jpg",
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/N-Mesopotamia_and_Syria_english.svg/1280px-N-Mesopotamia_and_Syria_english.svg.png"
-    ]
+    // const images =[
+    //   "https://upload.wikimedia.org/wikipedia/commons/c/c2/Gebel_el-Arak_Knife_ivory_handle_%28front_top_part_detail%29.jpg",
+    //   "https://upload.wikimedia.org/wikipedia/commons/b/b7/Mesopotamia%2C_Periodo_proto-dinastico%2C_placca_con_scena_di_banchetto%2C_da_khafajah%2C_2650-2550_ac_ca.jpg",
+    //   "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Anubanini_extracted.jpg/1024px-Anubanini_extracted.jpg",
+    //   "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/N-Mesopotamia_and_Syria_english.svg/1280px-N-Mesopotamia_and_Syria_english.svg.png"
+    // ]
 
-    const { colorMode } = useColorMode()
-
+    // const { colorMode } = useColorMode()
     const { isOpen, onOpen, onClose } = useDisclosure()
     const boxClickRef = React.useRef()
-    const [histData, setHistData] = useState([]);
-    const [drawerContent, setDrawerContent] = useState({});
+    const [timelineData, setTimelineData] = useState([]);
+    const [drawerData, setDrawerData] = useState({});
 
     const [isLargerThan1280] = useMediaQuery("(min-width: 960px)");
 
     const [fetchingWikiData, setFetchingWikiData] = useState(true);
   
-    const fetchWikiPageContent = async () =>{
-      try {
-
-        setFetchingWikiData(true);
-
-        const pageResponse = await wiki({
-            apiUrl: 'https://en.wikipedia.org/w/api.php'
-          }).page("History_of_Mesopotamia")
-            
-        const pageContent = await pageResponse.content();
-        const filterPageCont = pageContent.filter(c => 
-            (c.title != "See also" 
-            && c.title !== 'References'
-            && c.title !== 'Further reading' 
-            && c.title !== 'External links'
-            && c.title !== 'Classical writers'
-            && c.title !== 'Short outline of Mesopotamia'
-            )
-            );
-
-        // imgs to be appended
-        const itemsArr = [];
-        await filterPageCont.map((c, i) =>{
-          c.items?.map((ci, i) => {
-            if(ci.title == "Early Dynastic period"){
-              ci.title = "Early Dynastic period (Mesopotamia)"
-            }
-            itemsArr.push(ci);
-          })
-        });
-
-        await Promise.all(
-          itemsArr.map(async (item) =>{
-          [item.images, item.dates, item.nationsToday, item.majorReligion] = await fetchPeriodWikiData(item.title);
-          }
-        ))
-        // console.log(itemsArr)
-        setHistData(itemsArr);
-        try{
-          sessionStorage.setItem('TLData', JSON.stringify(itemsArr));
-
-        }
-        catch(error){
-          console.log('Failed to set data in session storage ', error);
-        }
-        // store array in session
-
-        setFetchingWikiData(false);
-
-        }catch(error){
-            console.log(error);
-        }
-    }
-
     const fetchPeriodWikiData = async(title) => {
 
       // find() searches and returns the first wiki page.
@@ -150,8 +95,7 @@ const TimeLine =() => {
 
       const pageImages = await searchResponse.images();
       const pageInfo = await searchResponse.fullInfo();
-
-      const dates = await extractDates(pageInfo.general, title);
+      const [readDate, queryDate] = formatDates(pageInfo.general, title);
       const currentNations = pageInfo.general?.today?.join(', ') || null;
       const majorReligion = pageInfo.general?.religion || null;
 
@@ -163,73 +107,169 @@ const TimeLine =() => {
       });
 
       // [images ([]), dates (str), curr nations (str)]
-      return [ExtractRandomElements(filteredImageURLs, filteredImageURLs.length < 5 ? 1 : 5), dates, currentNations, majorReligion];
+      return [ExtractRandomElements(filteredImageURLs, filteredImageURLs.length < 5 ? 1 : 5), readDate, queryDate, currentNations, majorReligion];
     }
 
     // generalInfo object includes differing fields that represent the date period.
-    const extractDates = (dataObj, periodName) => {
+    const formatDates = (dataObj, periodName) => {
 
       //* potential date fields: 
       // yearStart/yearEnd, dates, lifeSpan
       // lifeSpan should take precendence. Followed by yearStart/End and finally dates.
       // yearStart/End + lifeSpan must include digits. 
 
-      console.log("extarcting...")
       const containsDigits = /\d/;
-      
+      // intention: start/end in object -> match[0], match[1]
+      const extractDigits = /([0-9,]+)/g;
+
+      var readableDates = '';
+      var queryableDate = {start: '', end: ''};
+
       if(dataObj.lifeSpan && containsDigits.test(dataObj.lifeSpan)){
-        return dataObj.lifeSpan;
+        readableDates =  dataObj.lifeSpan;
       }
-      if(dataObj.yearStart && dataObj.yearEnd 
-        && containsDigits.test(dataObj.yearStart)
-        && containsDigits.test(dataObj.yearEnd)){
-        return dataObj.yearStart + ' - ' + dataObj.yearEnd;
+      else if(dataObj.yearStart && dataObj.yearEnd 
+              && containsDigits.test(dataObj.yearStart)
+              && containsDigits.test(dataObj.yearEnd)){
+        
+        readableDates = dataObj.yearStart + ' - ' + dataObj.yearEnd;
       }
-      if(dataObj.dates && containsDigits.test(dataObj.dates)){
-        return dataObj.dates;
-      }
-
-      // check specific periods and allocate manually.
-      switch (periodName) {
-        case "Chalcolithic period":
-          return "c. 6000 - 3300 BCE";
-        case "Early Dynastic period (Mesopotamia)":
-          return "c. 2900 – 2350 BCE"
-        case "Akkadian Empire":
-          return "c. 2334 – 2154 BCE"
-        case "Hurrians":
-          return "c. 1600 - c. 1000 BCE"
-        case "Bronze Age collapse":
-          return "c. 1200 - 1150 BCE"
-        case "Classical Antiquity to Late Antiquity":
-          return "c. 539 BCE - 700 CE"
-        default:
-          break;
-      }
-
-      return null
-
-    }
-
-    const onOpenDrawer= (title, content, subcontents = null, images = null)=>{
-      onOpen();
-      setDrawerContent({title: title, content: content, subContents: subcontents, images: images});
-    }
-    useEffect(() => {
-      //  if TL Data is empty, fetch from wiki api
-      if(sessionStorage.getItem("TLData") != null && sessionStorage.getItem("TLData") != "[]" && sessionStorage){
-        // console.log('dsga ', sessionStorage.getItem('TLData') )
-        const LSHist = JSON.parse(sessionStorage.getItem('TLData'));
-        setHistData(LSHist);
-        setFetchingWikiData(false);
+      else if(dataObj.dates && containsDigits.test(dataObj.dates)){
+        readableDates = dataObj.dates;
       }
       else{
-        console.log('fetching')
+        // check specific periods and allocate manually.
+        switch (periodName) {
+          case "Pre-Pottery Neolithic period":
+            readableDates = "c. 10,000 — 6,500 BCE";
+            break;
+          case "Chalcolithic period":
+            readableDates = "c. 6000 - 3300 BCE";
+            break;
+          case "Early Dynastic period (Mesopotamia)":
+            readableDates = "c. 2900 – 2350 BCE"
+            break;
+          case "Akkadian Empire":
+            readableDates = "c. 2334 – 2154 BCE"
+            break;
+          case "Hurrians":
+            readableDates = "c. 1600 - c. 1000 BCE"
+            break;
+          case "Bronze Age collapse":
+            readableDates = "c. 1200 - 1150 BCE"
+            break;
+          case "Classical Antiquity to Late Antiquity":
+            readableDates = "c. 539 BCE - 700 CE"
+            break;
+          default:
+            break;
+        }
+      }
+
+      const dateSet = readableDates.match(extractDigits);
+      var dash = true;
+
+      // BCE
+      if(periodName == "Classical Antiquity to Late Antiquity"){
+        dash = false
+      }
+      
+      queryableDate = {start: `-${dateSet[0]?.replace(/,/g, '')}`, end: `${dash ? '-' : ''}${dateSet[1]?.replace(/,/g, '')}`}
+
+      return [readableDates, queryableDate]
+
+    }
+
+    // object to be used in drawer and eventually in gallery.
+    const onOpenDrawer = (dataObject)=>{
+      onOpen();
+      setDrawerData({
+        title: dataObject.title, 
+        content: dataObject.mainContent, 
+        subContents: dataObject.items || null, 
+        images: dataObject.imageSet || null,
+        dates: dataObject.dates
+      });
+    }
+
+    useEffect(() => {
+      //  if TL Data is empty, fetch from wiki api
+      if(sessionStorage && sessionStorage.getItem("TLData") != null && sessionStorage.getItem("TLData") != "[]"){
+        // console.log('dsga ', sessionStorage.getItem('TLData') )
+        const LSTLData = JSON.parse(sessionStorage.getItem('TLData'));
+        setTimelineData(LSTLData);
+        setFetchingWikiData(false);
+
+      }
+      else{
+
+        // for cancelling wiki api fetch. 
+        let isSubscribed = true
+
+        const fetchWikiPageContent = async () => {
+          try {
+
+
+            setFetchingWikiData(true);
+    
+              const pageResponse = await wiki({
+                  apiUrl: 'https://en.wikipedia.org/w/api.php'
+                }).page("History_of_Mesopotamia")
+                  
+              const pageContent = await pageResponse.content();
+              const filterPageCont = pageContent.filter(c => 
+                  (c.title != "See also" 
+                  && c.title !== 'References'
+                  && c.title !== 'Further reading' 
+                  && c.title !== 'External links'
+                  && c.title !== 'Classical writers'
+                  && c.title !== 'Short outline of Mesopotamia'
+                  )
+                  );
+            if(isSubscribed){
+    
+              // imgs to be appended
+              const itemsArr = [];
+              await filterPageCont.map((c, i) =>{
+                c.items?.map((ci, i) => {
+                  if(ci.title == "Early Dynastic period"){
+                    ci.title = "Early Dynastic period (Mesopotamia)"
+                  }
+                  itemsArr.push(ci);
+                })
+              });
+    
+              await Promise.all(
+                itemsArr.map(async (item) =>{
+                [item.images, item.dates, item.dateQuery, item.nationsToday, item.majorReligion] = await fetchPeriodWikiData(item.title);
+                }
+              ))
+              setTimelineData(itemsArr);
+    
+              
+              try{
+                // store array in session
+                sessionStorage.setItem('TLData', JSON.stringify(itemsArr));
+              }
+              catch(error){
+                console.log('Failed to set data in session storage ', error);
+              }
+              setFetchingWikiData(false);
+            }
+          }
+          catch(error){
+              console.log(error);
+          }
+        };
+
         fetchWikiPageContent();
+
+        return () => {
+          setFetchingWikiData(false);
+          isSubscribed = false;
+        }
       }
     }, [])
-
-   
 
 
     return (
@@ -290,7 +330,7 @@ const TimeLine =() => {
           }
           </Box>
 
-        {!fetchingWikiData && <ImageDistort
+        {!fetchingWikiData ? <ImageDistort
                         styles={{ zIndex: -10 }}
                         listRoot={".ImageDistortRoot"}
                         itemRoot={".ImageDistortItem"}
@@ -307,7 +347,7 @@ const TimeLine =() => {
                           }
                         }}
                       />
-        }
+        : null} 
         </VStack>
       </>
       
@@ -346,10 +386,10 @@ const TimeLine =() => {
 
         <Timeline align={isLargerThan1280 ? 'right' : 'right'} className="myListRoot" style={{padding:'0px'}}>
 
-          {histData?.map((c,i) => {
+          {timelineData?.map((c,i) => {
               return(
 
-                  <TimelineItem key={i} >
+                  <TimelineItem key={i}>
                      <TimelineOppositeContent style={{paddingLeft:!isLargerThan1280 && '5px'}}>
                       <Table marginBottom='100px' size={{base: 'sm', lg:'lg'}}>
                         <Tbody fontSize={{ base:'8px', lg: "18px", md:"12px" }}>
@@ -382,7 +422,13 @@ const TimeLine =() => {
                       <TimelineContent style={{marginBottom:'5vh'}}>
                         <Box
                           ref={boxClickRef} 
-                          onClick={() => onOpenDrawer(c.title, c.content, c.items &&c.items, c.images && c.images)}
+                          onClick={() => onOpenDrawer({
+                            title: c.title, 
+                            mainContent: c.content, 
+                            items: c.items &&c.items, 
+                            imageSet: c.images && c.images,
+                            dates: c.dateQuery
+                            })}
                           maxWidth='4xl' 
                           width={!isLargerThan1280 && '40vw'}
                           // padding='10px' 
@@ -417,7 +463,7 @@ const TimeLine =() => {
         </Timeline>
     }
       </Box>
-
+    
      {isOpen && <Drawer
           isOpen={isOpen}
           placement="right"
@@ -432,12 +478,12 @@ const TimeLine =() => {
               
             <DrawerCloseButton  />
               <DrawerHeader >
-                <Heading fontSize={{ base:'30px', lg: "40px" }}>{drawerContent.title}</Heading>
+                <Heading fontSize={{ base:'30px', lg: "40px" }}>{drawerData.title}</Heading>
               </DrawerHeader>
               {console.log("object")}
               <DrawerBody marginBottom='-80px' paddingLeft={{ base: 5, lg: 20 }} paddingRight={{ base: 5, lg: 20 }}>
-                <Text fontSize={{ base:'17px', lg: "22px" }} marginBottom='30px'>{drawerContent.content}</Text>
-                {drawerContent.subContents && drawerContent.subContents.map((c, i) => (
+                <Text fontSize={{ base:'17px', lg: "22px" }} marginBottom='30px'>{drawerData.content}</Text>
+                {drawerData.subContents && drawerData.subContents.map((c, i) => (
                   <Box key={i} marginBottom='10px'>
                     <Heading fontSize={{ base:'20px', lg: "30px" }} fontWeight='bold'>{c.title}</Heading>
                     <Text fontSize={{ base:'17px', lg: "22px" }} marginTop='4px'>{c.content}</Text>
@@ -446,21 +492,23 @@ const TimeLine =() => {
                   Discover Artefacts</Button></Link>
                   </Box>
                 ))}
+                {drawerData.images &&
                 <Swiper pagination={true} className="swiper">
-                    {drawerContent.images && drawerContent.images.map((img, i) => (
+                    {drawerData.images.map((img, i) => (
                       <SwiperSlide key={i}>
                         <Image src={img} fallback={<Code>Fetching Image...</Code>}/>
                       </SwiperSlide>
-                    )
-                    )
+                    ))
                     }
+                    
                 </Swiper>
+              }
               </DrawerBody>
               <Flex justify='center'>
               <DrawerFooter >
 
 
-              <Link to={{ pathname: '/gallery', state:{ title : drawerContent.title}}}>
+              <Link to={{ pathname: '/gallery', state:{ title : drawerData.title, startPeriod: drawerData.dates.start, endPeriod: drawerData.dates.end}}}>
                 <Button fontSize={{ base:'15px', lg: "20px" }} size='lg' variant="outline" fontWeight='normal' mt={20}>
                   Discover Museum Artefacts from this period</Button></Link>
               </DrawerFooter>
