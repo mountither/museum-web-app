@@ -1,27 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
-    Box,
-    Divider,
-    Stack,
-    Tag,
-    TagLabel,
-    TagLeftIcon,
-    Image,
-    Center,
-    Heading,
-    Stat,
-    StatHelpText,
-    StatLabel,
-    Icon,
-    Code ,
-    Table,
+  Box,
+  Stack,
+  Image,
+  Center,
+  Heading,
+  Table,
   Tbody,
   Tr,
   Td,
   useColorMode,
-
 } from '@chakra-ui/react';
-import {  RiMapPinTimeLine} from "react-icons/ri";
 
 // params: the content to be shown on card.
 // reqs: image, date
@@ -39,13 +28,14 @@ const GalleryCard = ({title, imgURL, dateCreation, region,  restPayload}) =>{
         <Heading 
           mb={4} 
           size='sm'
+          fontSize={{ base:'15px', lg: "25px" }}
         >
           {title ? title : 'Untitled'}
         </Heading>
 
         <Stack  maxHeight="100%" overflow="hidden" maxWidth='100vw'>
         
-        <Image _hover={{transform: 'scale(1.1)'}}  transition='transform .6s' objectFit="contain"  src={imgURL}/>
+        <Image _hover={{transform: 'scale(1.03)'}}  transition='transform .6s' objectFit="contain"  src={imgURL}/>
         </Stack>
         
 

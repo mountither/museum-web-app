@@ -1,9 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
     Alert,
     AlertIcon,
     AlertTitle,
-    AlertDescription,
     CloseButton,
     UnorderedList, ListItem,
     useDisclosure,
@@ -31,11 +30,11 @@ const AlertContent = ({errors, ...boxProps}) =>{
               variant='subtle'
               >
                 <AlertIcon size={5}/>
-                <AlertTitle fontSize={{base: 15, lg:15, md:15, sm:10, xs:10}} mr={2}>API Fail</AlertTitle>
+                <AlertTitle fontSize={{base: 15, lg:15, md:15, sm:10}} mr={2}>API Fail</AlertTitle>
                 <UnorderedList>
                {errors.map((msg, i) => {
                   return(
-                      <ListItem key={i} fontSize={{base: 13, lg:13, md:13, sm:10, xs:10}}>{msg}</ListItem>
+                      <ListItem key={i} fontSize={{base: 13, lg:13, sm:10, xs:10}}>{msg}</ListItem>
                       )
                       // <AlertDescription fontSize={{base: 15, lg:15, md:15, sm:10, xs:10}}>{msg}</AlertDescription>
                     }
