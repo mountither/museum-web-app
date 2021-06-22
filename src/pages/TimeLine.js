@@ -159,7 +159,7 @@ const TimeLine =() => {
             readableDates = "c. 1200 - 1150 BCE"
             break;
           case "Classical Antiquity to Late Antiquity":
-            readableDates = "c. 539 BCE - 700 CE"
+            readableDates = "c. 539 BCE - 800 CE"
             break;
           default:
             break;
