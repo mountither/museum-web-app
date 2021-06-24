@@ -1,11 +1,11 @@
 import React from 'react'
 
-import Distort1 from '../assets/distort01.jpg'
-import SmoothScroll from '../utils/SmoothScroll';
+import Distort1 from '../Assets/distort01.jpg'
+import SmoothScroll from '../Utils/SmoothScroll';
 
-import CuneiformIntro from './typography/CuneiformIntro'
+import CuneiformIntro from './Typography/CuneiformIntro'
 
-import ImageDistort from '../utils/ImageDistort';
+import ImageDistort from '../Utils/ImageDistort';
 import { 
     Box, 
     VStack, 
@@ -15,7 +15,7 @@ import {
     deviceType,
 } from 'detect-it';
 
-import SkeletonIntro from './skeletons/SkeletonIntro';
+import SkeletonIntro from './Skeletons/SkeletonIntro';
 
 const TimelineIntro = ({isLoading}) => {
 

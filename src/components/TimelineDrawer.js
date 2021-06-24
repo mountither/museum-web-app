@@ -19,7 +19,7 @@ import {
   } from "react-router-dom";
   import { Swiper, SwiperSlide } from "swiper/react";
 
-import Heading from './typography/Heading'
+import Heading from './Typography/Heading'
 
 import "swiper/swiper.min.css";
 import "swiper/components/pagination/pagination.min.css"

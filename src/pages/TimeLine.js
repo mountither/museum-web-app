@@ -15,9 +15,9 @@ import {
 } from '@chakra-ui/react';
 
 
-import ColorModeSwitcher from '../components/ColorModeSwitcher';
+import ColorModeSwitcher from '../Components/ColorModeSwitcher';
 
-import TimelineIntro from '../components/TimelineIntro'
+import TimelineIntro from '../Components/TimelineIntro'
 
 import Timeline from '@material-ui/lab/Timeline';
 import TimelineItem from '@material-ui/lab/TimelineItem';
@@ -27,11 +27,11 @@ import TimelineContent from '@material-ui/lab/TimelineContent';
 import TimelineDot from '@material-ui/lab/TimelineDot';
 import TimelineOppositeContent from "@material-ui/lab/TimelineOppositeContent";
 
-import TimelineBox from '../components/TimelineBox';
+import TimelineBox from '../Components/TimelineBox';
 
-import Heading from '../components/typography/Heading'
+import Heading from '../Components/Typography/Heading'
 
-import useWikiData from '../api/wikipedia'
+import useWikiData from '../API/Wikipedia'
 
 //https://github.com/rafgraph/detect-it#detection-details
 // dont render mouse over img distort for touch screens and hybrid.

@@ -1,6 +1,6 @@
 import React, {useEffect, useReducer} from 'react';
 
-import { reducer } from '../../state/reducer';
+import { reducer } from '../../State/reducer';
 
 import {
   requestStarted,
@@ -8,7 +8,7 @@ import {
   requestFailed,
   requestCancelled,
   setSessionStorage
-} from '../../state/actions'
+} from '../../State/actions'
 
 import wiki from 'wikijs';
 

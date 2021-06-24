@@ -1,8 +1,8 @@
 import React from 'react';
 import { useColorMode, useColorModeValue, Image, IconButton} from '@chakra-ui/react';
 
-import SunToggle from '../assets/sun_toggle.png';
-import MoonToggle from '../assets/moon_toggle.png';
+import SunToggle from '../Assets/sun_toggle.png';
+import MoonToggle from '../Assets/moon_toggle.png';
 
 const ColorModeSwitcher = props => {
 

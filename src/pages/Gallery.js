@@ -9,7 +9,7 @@ import {
 
 import SkeletonCards from "../Components/Skeletons/SkeletonCards";
 
-import useMuseumData from '../API/museums'  
+import useMuseumData from '../API/Museums'  
 
 import {
   useLocation,

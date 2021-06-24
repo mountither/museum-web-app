@@ -1,6 +1,6 @@
 import wiki from 'wikijs';
 
-import {ExtractRandomElements} from '../../utils/ArrayHelpers'
+import {ExtractRandomElements} from '../../Utils/ArrayHelpers'
 
 import parseDates from "./parseDates";
 

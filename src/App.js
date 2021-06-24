@@ -7,15 +7,14 @@ import { mode } from '@chakra-ui/theme-tools';
 
 import { createBrowserHistory } from "history";
 
-import Gallery from './pages/Gallery';
-import TimeLine from "./pages/TimeLine";
+import Gallery from './Pages/Gallery';
+import TimeLine from "./Pages/TimeLine";
 
 import { createBreakpoints } from "@chakra-ui/theme-tools"
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
 } from "react-router-dom";
 
 import "@fontsource/cardo/400.css"
