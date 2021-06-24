@@ -9,7 +9,7 @@ import {
 
 import SkeletonCards from "../Components/Skeletons/SkeletonCards";
 
-import useMuseumData from '../api/museums'  
+import useMuseumData from '../API/museums'  
 
 import {
   useLocation,
@@ -20,7 +20,7 @@ import {
 import AlertContent from '../Components/AlertContent';
 import GalleryCard from '../Components/GalleryCard';
 
-import Heading from '../Components/typography/Heading'
+import Heading from '../Components/Typography/Heading'
 
 // TODO - Implement a Load more feature (pagination)
 

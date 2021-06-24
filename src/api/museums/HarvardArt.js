@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {CenturyFromYear, MillenniumFromYear} from '../../utils/DateHelpers/HAMApiDateParser';
+import {CenturyFromYear, MillenniumFromYear} from '../../Utils/DateHelpers/HAMApiDateParser';
 
 const FetchHAMData = async(params, source)=>{
   const APIName = 'HAM'

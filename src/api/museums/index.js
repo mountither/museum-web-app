@@ -2,7 +2,7 @@ import {useEffect, useReducer} from 'react';
 
 import axios from 'axios';
 
-import { reducer } from '../../state/reducer';
+import { reducer } from '../../State/reducer';
 
 import METData from "./Metro";
 import VAMData from "./VicAlbert";
@@ -18,7 +18,7 @@ import {
   requestSuccessful,
   requestFailed,
   requestCancelled,
-} from '../../state/actions'
+} from '../../State/actions'
 
 
 const useMuseumData = () => {
