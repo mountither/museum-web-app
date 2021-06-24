@@ -24,7 +24,7 @@ const GalleryCard = ({title, imgURL, dateCreation, region,  restPayload}) =>{
 
     return (
 
-    <Box boxShadow={colorMode === 'dark' ? 'lg' :'sm'} borderRadius="md" maxW="70rem" overflow="hidden" padding={5} >
+    <Box boxShadow={colorMode === 'dark' ? 'dark-lg' :'sm'} borderRadius="md" maxW="70rem" overflow="hidden" padding={5} >
         <Heading 
           mb={4} 
           size='sm'
@@ -35,7 +35,10 @@ const GalleryCard = ({title, imgURL, dateCreation, region,  restPayload}) =>{
 
         <Stack  maxHeight="100%" overflow="hidden" maxWidth='100vw'>
         
-        <Image _hover={{transform: 'scale(1.03)'}}  transition='transform .6s' objectFit="contain"  src={imgURL}/>
+        <Image _hover={{transform: 'scale(1.03)'}}  
+        transition='transform .6s' 
+        objectFit="contain"  
+        src={imgURL}/>
         </Stack>
         
 
