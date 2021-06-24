@@ -7,9 +7,9 @@ import {
 } from '@chakra-ui/react';
 
 
-import SkeletonCards from "../components/skeletons/SkeletonCards";
+import SkeletonCards from "../Components/Skeletons/SkeletonCards";
 
-import useMuseumData from '../api/museums'
+import useMuseumData from '../api/museums'  
 
 import {
   useLocation,
@@ -17,10 +17,10 @@ import {
   Redirect
 } from "react-router-dom";
 
-import AlertContent from '../components/AlertContent';
-import GalleryCard from '../components/GalleryCard';
+import AlertContent from '../Components/AlertContent';
+import GalleryCard from '../Components/GalleryCard';
 
-import Heading from '../components/typography/Heading'
+import Heading from '../Components/typography/Heading'
 
 // TODO - Implement a Load more feature (pagination)
 
