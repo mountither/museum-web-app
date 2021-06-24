@@ -4,8 +4,9 @@ const FetchMETData = async(params, source)=>{
     const APIName = "MET";
     try
     {
+      const keywords = 'period'
       // fecth from metro museum
-      const url = `https://collectionapi.metmuseum.org/public/collection/v1/search?q=${params.query}&hasImage=true&limit=5`;
+      const url = `https://collectionapi.metmuseum.org/public/collection/v1/search?q=${params.query}+${keywords}&hasImage=true&limit=5`;
       const objectResponse = await axios.get(url, {
         cancelToken: source.token
       });

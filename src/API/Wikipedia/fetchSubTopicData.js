@@ -10,7 +10,7 @@ const fetchSubTopicData = async(title) => {
         const searchResponse = await wiki({
           apiUrl: 'https://en.wikipedia.org/w/api.php'
         }).find(title)
-  
+        
         const pageImages = await searchResponse.images();
         const pageInfo = await searchResponse.fullInfo();
         const [readDate, queryDate] = parseDates(pageInfo.general, title);

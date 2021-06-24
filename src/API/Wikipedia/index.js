@@ -65,6 +65,9 @@ const useWikiData = ({pageName}) => {
                     if(ci.title == "Early Dynastic period"){
                       ci.title = "Early Dynastic period (Mesopotamia)"
                     }
+                    if(ci.title == "Pre-Pottery Neolithic period"){
+                      ci.title = "Pre-Pottery Neolithic"
+                    }
                     data.push(ci);
                   })
                 });

@@ -29,7 +29,7 @@ const parseDates = (dataObj, periodName) => {
         else{
           // check specific periods and allocate manually.
           switch (periodName) {
-            case "Pre-Pottery Neolithic period":
+            case "Pre-Pottery Neolithic":
               readableDates = "c. 10,000 — 6,500 BCE";
               break;
             case "Chalcolithic period":
@@ -63,7 +63,12 @@ const parseDates = (dataObj, periodName) => {
           dash = false
         }
         
-        queryableDate = {start: `-${dateSet[0]?.replace(/,/g, '')}`, end: `${dash ? '-' : ''}${dateSet[1]?.replace(/,/g, '')}`}
+        if(dateSet){
+          queryableDate = {start: `-${dateSet[0]?.replace(/,/g, '')}`, end: `${dash ? '-' : ''}${dateSet[1]?.replace(/,/g, '')}`}
+        }
+        else{
+          queryableDate = {start: null, end: null};
+        }
   
         return [readableDates, queryableDate]
   
