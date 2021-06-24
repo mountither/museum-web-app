@@ -1,19 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
-  Box,
-  Text,
   VStack,
   Grid,
   Divider,
-  useColorMode,
-  Heading,
   Button
 } from '@chakra-ui/react';
-import { ColorModeSwitcher } from '../components/ColorModeSwitcher';
 
-import axios from 'axios';
 
-import SkeletonCards from "../components/Skeletons/SkeletonCards";
+import SkeletonCards from "../components/skeletons/SkeletonCards";
+
+import useMuseumData from '../api/museums'
 
 import {
   useLocation,
@@ -24,91 +20,26 @@ import {
 import AlertContent from '../components/AlertContent';
 import GalleryCard from '../components/GalleryCard';
 
-import { METData,VAMData, HAMData, AICData } from "../api/museums";
+import Heading from '../components/typography/Heading'
+
 // TODO - Implement a Load more feature (pagination)
 
 const Gallery = ()=> {
 
-  const [metArtData, setMETArtData] = useState([]);
-  const [vamArtData, setVAMArtData] = useState([]);
-  const [hamArtData, setHAMArtData] =useState([]);
-  const [aicArtData, setAICArtData] = useState([]);
-  const [smgArtData, setSMGArtData] = useState([]);
-  const [mvcArtData, setMVCArtData] = useState([]);
-
-  const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const location = useLocation();
   const history = useHistory();
 
-  const fetchMuseumObjects = async (source) =>{
-      //* location state holds the query title and years. 
-      // const time1 = Date.now();
-      // testing potentail parameters
-      //const params = {query:'Achaemenid', start: -600, end: -330};
-      //const params = {query: 'Mesopotamia', start: -1, end: 1000};
-      const params = {query: location?.state?.title, start: parseInt(location?.state?.startPeriod) || '-5000', end: parseInt(location?.state?.endPeriod) || '1950'};
-
-      setLoading(true);
-
-      const errorSet = [];
-      
-      const [METRes, METError] = await METData(params, source);
-      !METError ? setMETArtData(METRes) : errorSet.push(METError);
-     
-      const [VAMRes, VAMError] = await VAMData(params, source);
-      !VAMError ? setVAMArtData(VAMRes) : errorSet.push(VAMError);
-
-      const [HAMRes, HAMError] = await HAMData(params, source);
-      !HAMError ? setHAMArtData(HAMRes) : errorSet.push(HAMError);
-      
-      const [AICRes, AICError] = await AICData(params, source);
-      !AICError ? setAICArtData(AICRes) : errorSet.push(AICError);
-
-      // not used
-      // const [SMGRes, SMGError] = await getSMGResponse(params, source);
-      // !SMGError ? setSMGArtData(SMGRes.data.data) : errorSet.push(SMGError);
-      
-      // not used
-      // const [MVCRes, MVCError] = await getMVCResponse(params, source);
-      // !MVCError ? setMVCArtData(MVCRes.data) : errorSet.push(MVCError);
-      
-      //const resSMITH = await axios.get(`https://www.brooklynmuseum.org/api/v2/tags/Mesopotamia`);
-      
-      // console.log(resSMITH.data.response.rows);
-      // const time2 = Date.now();
-      // console.log(time2- time1);
-
-      setErrors(errorSet);
-      setLoading(false);
-  }
-  useEffect(() =>{
-    let source = axios.CancelToken.source();
-
-    window.scrollTo(0,0);
-
-    fetchMuseumObjects(source);
-
-    return () => {
-      setLoading(false);
-      source.cancel();
-    }
-
-  }, [])
-
+  const {isLoading, data, error} = useMuseumData();
 
   return (
     <>
     {(location.state == undefined || location.state == null || location.state == '') ? 
     
-    <Redirect to='/'/> :
+    <Redirect to='/'/> 
+    
+    :
 
     <VStack spacing={10} padding={3}>
-      
-      <Box pos='absolute' left="0px">
-        <ColorModeSwitcher />
-      </Box>
 
            <Button fontWeight='semibold' fontSize='15px'
            variant='link'
@@ -117,23 +48,24 @@ const Gallery = ()=> {
              Back
              </Button>
 
-          <Grid
+              <Grid
                 templateRows="1fr 0.2fr"
                 templateColumns="1fr 1fr"
                 gridAutoFlow='dense'
                 gap={0}>
             
-              <Heading 
-       
-              marginTop={10} 
-              gridArea={'1/1/2/3'} 
-              fontSize={{lg:'9xl', base:'5xl'}} 
-              marginLeft={5} 
-              fontWeight="hairline" 
-              textTransform='capitalize'
-               >{location.state.title || 'Untitled'}<Divider/></Heading>
+              <Heading      
+                main
+                marginTop={10} 
+                gridArea={'1/1/2/3'} 
+                marginLeft={5}  
+                title={location.state.title || 'Untitled'} 
+              />
+               
+               <Divider/>
 
-                <AlertContent errors={errors}  zIndex={10} gridArea={'2/2/3/3'}/>   
+                {error && error.length !== 0
+                && <AlertContent errors={error}  zIndex={10} gridArea={'2/2/3/3'}/>}   
 
                 {/* <Text paddingLeft={5} fontSize={{ base:'15px', lg: "25px", md:"25px" }}>
                   {`Results: ${metArtData.length+vamArtData.length+hamArtData.length+aicArtData.length}`}
@@ -142,8 +74,8 @@ const Gallery = ()=> {
           </Grid>
 
           {
-            loading ? <SkeletonCards /> : 
-              metArtData?.map((a, i) =>(
+            isLoading ? <SkeletonCards /> : 
+            data['MET']?.map((a, i) =>(
                 
                 <GalleryCard 
                   key={i} 
@@ -162,8 +94,8 @@ const Gallery = ()=> {
             }
 
             {
-              loading ? <SkeletonCards /> : 
-                vamArtData?.map((a, i) => (
+              isLoading ? <SkeletonCards /> : 
+              data['VAM']?.map((a, i) => (
                   <GalleryCard 
                     key={i} 
                     title={a._primaryTitle ? a._primaryDate :a.objectType} 
@@ -181,8 +113,8 @@ const Gallery = ()=> {
 
           {
           
-            loading ? <SkeletonCards /> : 
-              hamArtData?.map((a, i) => (
+          isLoading ? <SkeletonCards /> : 
+          data['HAM']?.map((a, i) => (
                 <GalleryCard 
                   key={i} 
                   title={a.title} 
@@ -199,8 +131,8 @@ const Gallery = ()=> {
 
           
           {
-            !loading &&
-              smgArtData?.map((a, i) => (
+            !isLoading &&
+            data['SMG']?.map((a, i) => (
                 <GalleryCard 
                   key={i} 
                   title={a.attributes.summary_title} 
@@ -215,8 +147,8 @@ const Gallery = ()=> {
           }
 
           {
-            !loading &&
-              mvcArtData?.map((a, i) => (
+            !isLoading &&
+            data['MVC']?.map((a, i) => (
                 <GalleryCard 
                   key={i} 
                   title={a?.displayTitle} 
@@ -229,8 +161,8 @@ const Gallery = ()=> {
           }
 
           {
-            !loading &&
-              aicArtData?.map((a, i) => (
+            !isLoading &&
+            data['AIC']?.map((a, i) => (
                 <GalleryCard 
                   key={i} 
                   title={a.title} 

@@ -1,0 +1,15 @@
+/* .MuiTimeline-root {
+    transform: rotate(90deg);
+  }
+.MuiTimelineContent-root {
+    text-align: left;
+}
+.timelineContent {
+    display: inline-block;
+    transform: rotate(-90deg);
+    text-align: center;
+    min-width: 50;
+}
+.timelineIcon {
+    transform: rotate(-90deg);
+} */
