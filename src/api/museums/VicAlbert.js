@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const FetchVAMData = async(params, source)=>{
-
+    const APIName = "VAM"
     try{
       // fetch from victoria and albert museum
       const limit = 10;
@@ -12,14 +12,14 @@ const FetchVAMData = async(params, source)=>{
       });
       
       console.log("Count in VAM:  ", response.data.info.record_count);
-      return [response.data.records, null];
+      return [APIName, response.data.records];
     }
     catch(error){
       if(axios.isCancel(error)){
-        return [null, 'Fetch Canceled @ VAM'];
+        throw 'Fetch Canceled @ VAM';
       }
       else{
-        return [null, 'Victoria and Albert Museum']
+        throw 'Victoria and Albert Museum';
       }
     }
 }

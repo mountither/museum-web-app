@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const FetchSMGData = async(params, source)=>{
-    try
+  const APIName = "SMG"  
+  try
     { 
       const headers = {
         'Accept': 'application/json',
@@ -14,15 +15,15 @@ const FetchSMGData = async(params, source)=>{
 
       console.log("Count in SMG: ", response.data.meta.count.type.all);
 
-      return [response.data.data, null]
+      return [APIName, response.data.data]
     }
     catch(error)
     {
       if(axios.isCancel(error)){
-        return [null, 'Fetch Canceled @ SMG'];
+        throw 'Fetch Canceled @ SMG';
       }
       else{
-        return [null, 'Science Museum Group']
+        throw 'Science Museum Group';
       }
     }
 }

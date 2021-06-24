@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const FetchMETData = async(params, source)=>{
+    const APIName = "MET";
     try
     {
       // fecth from metro museum
@@ -10,7 +11,7 @@ const FetchMETData = async(params, source)=>{
       });
       
       const resMETCount = objectResponse.data.total > 10 ? 10 : objectResponse.data.total;
-
+      console.log(params.start, params.end)
       const response = [];
       if(objectResponse.data.total > 0){
         await Promise.all(
@@ -27,18 +28,18 @@ const FetchMETData = async(params, source)=>{
   
           }));
       }
-      console.log("Count in MET: (10 shown) ", objectResponse.data.total);
+      console.log("Count in MET: (10 shown - wo/date check) ", objectResponse.data.total);
 
-      //data, error
-      return [response, null];
+      //name, data, error
+      return [APIName,response];
     }
     catch(error)
     {
       if(axios.isCancel(error)){
-        return [null, 'Fetch Canceled @ MET'];
+        throw 'Fetch Canceled @ MET';
       }
       else{
-        return [null, 'Metro Museum'];
+        throw 'Metro Museum';
       }
     }
       

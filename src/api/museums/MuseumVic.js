@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const FetchMVCData = async(params, source)=>{
+  const APIName = 'MVC'
   try
   { 
     const limit = 10;
@@ -18,15 +19,15 @@ const FetchMVCData = async(params, source)=>{
 
     console.log("Count in MVC: (10 shown) ", response.headers['total-results']);
 
-    return [response.data, null]
+    return [APIName, response.data]
   }
   catch(error)
   {
     if(axios.isCancel(error)){
-      return [null, 'Fetch Canceled @ MVC'];
+      throw 'Fetch Canceled @ MVC';
     }
     else{
-      return [null, 'Museum Victoria']
+      throw 'Museum Victoria';
     }
   }
 }

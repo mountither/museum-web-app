@@ -2,7 +2,7 @@ import axios from 'axios';
 import {CenturyFromYear, MillenniumFromYear} from '../../utils/DateHelpers/HAMApiDateParser';
 
 const FetchHAMData = async(params, source)=>{
-
+  const APIName = 'HAM'
     try{
 
       // fetch from harvard arts museum
@@ -27,14 +27,14 @@ const FetchHAMData = async(params, source)=>{
 
       console.log("Count in HAM: (10 shown) ", response.data.info.totalrecords);
       
-      return [response.data.records, null];
+      return [APIName, response.data.records];
     }
     catch(error){
       if(axios.isCancel(error)){
-        return [null, 'Fetch Canceled @ HAM'];
+        throw 'Fetch Canceled @ HAM';
       }
       else{
-        return [null, 'Havard Arts Museum']
+        throw 'Havard Arts Museum';
       }
     }
 }

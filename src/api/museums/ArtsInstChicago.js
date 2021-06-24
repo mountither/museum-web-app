@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const FetchAICData = async(params, source)=>{
+    const APIName = "AIC";
     try
     { 
       const limit = 5;
@@ -44,16 +45,17 @@ const FetchAICData = async(params, source)=>{
 
       console.log("Count in AIC: (shown 10)", response.data.pagination.total);
 
-      return [response.data.data, null]
+      return [APIName, response.data.data]
 
     }
     catch(error)
     {
       if(axios.isCancel(error)){
-        return [null, 'Fetch Canceled @ AIC'];
+        throw 'Fetch Canceled @ AIC';
       }
       else{
-        return [null, 'Art Institute of Chicago']
+        // return [APIName, null, 'Art Institute of Chicago']
+        throw "Art Institute of Chicago";
       }
     }
   }
