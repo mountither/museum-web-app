@@ -2,9 +2,9 @@ import React from 'react';
 import { useColorMode, useColorModeValue, Image, IconButton} from '@chakra-ui/react';
 
 import SunToggle from '../assets/sun_toggle.png';
-import MoonStarToggle from '../assets/moonstar_toggle.png';
+import MoonToggle from '../assets/moon_toggle.png';
 
-export const ColorModeSwitcher = props => {
+const ColorModeSwitcher = props => {
 
   const { toggleColorMode, colorMode} = useColorMode();
   
@@ -24,10 +24,12 @@ export const ColorModeSwitcher = props => {
     <Image
       cursor = 'pointer'
       width={10}
-      src={colorMode == 'light' ? MoonStarToggle : SunToggle}
+      src={colorMode == 'light' ? MoonToggle : SunToggle}
       {...props}
     />
   </IconButton>
  
   );
 };
+
+export default ColorModeSwitcher;
