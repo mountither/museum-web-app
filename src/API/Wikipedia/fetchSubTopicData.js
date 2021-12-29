@@ -14,7 +14,12 @@ const fetchSubTopicData = async(title) => {
         const pageImages = await searchResponse.images();
         const pageInfo = await searchResponse.fullInfo();
         const [readDate, queryDate] = parseDates(pageInfo.general, title);
-        const currentNations = pageInfo.general?.today?.join(', ') || null;
+        let currentNations;
+        if (Array.isArray(pageInfo.general?.today)) {
+          currentNations = pageInfo.general?.today?.join(', ') || null;
+        } else {
+          currentNations = pageInfo.general?.today || null;
+        }
         const majorReligion = pageInfo.general?.religion || null;
   
         const includeRegex = /\b(jpg|JPG|png)\b/i
