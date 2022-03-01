@@ -18,7 +18,7 @@ import {
 // reqs: image, date
 // others are props
 
-const museumsDetails = {
+export const museumsDetails = {
   MET: {
     logo: '/images/museum-logos/met-logo.svg',
     url: 'https://www.metmuseum.org/',
@@ -72,10 +72,6 @@ const GalleryCard = ({
         <Heading size="sm" fontSize={{ base: '15px', lg: '25px' }}>
           {title ? title : 'Untitled'}
         </Heading>
-        <Flex direction={'row'} alignItems={'center'} gridGap={3}>
-          <Text size="sm" color={'gray.400'}>
-            From:{' '}
-          </Text>
           <Box
             as="a"
             target="_blank"
@@ -94,7 +90,6 @@ const GalleryCard = ({
               transition="opacity .6s"
             />
           </Box>
-        </Flex>
       </Flex>
 
       <Stack maxHeight="100%" overflow="hidden" maxWidth="100vw">

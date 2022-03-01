@@ -8,7 +8,7 @@ const Heading = ({title, main = false,  ...props}) => {
     return ( 
 
         <ChakraHeading 
-            fontSize={{lg: main ? '8xl' : '3xl', base: main ? '6xl' : 'xs'}} 
+            fontSize={{lg: main ? '7xl' : '3xl', base: main ? '5xl' : 'xs'}} 
             textTransform= 'capitalize'
             {...props}
         >
