@@ -72,7 +72,7 @@ const TimelineDrawer = ({ drawerData, onClose }) => {
                 <Text fontSize={{ base: '17px', lg: '22px' }} marginTop="4px">
                   {c.content}
                 </Text>
-                <Link to={{ pathname: '/gallery', state: { title: c.title } }}>
+                {/* <Link to={{ pathname: '/gallery', state: { title: c.title } }}>
                   <Button
                     size="sm"
                     variant="outline"
@@ -84,7 +84,7 @@ const TimelineDrawer = ({ drawerData, onClose }) => {
                   >
                     Discover Artefacts
                   </Button>
-                </Link>
+                </Link> */}
               </Box>
             ))}
           {drawerData.images && (
